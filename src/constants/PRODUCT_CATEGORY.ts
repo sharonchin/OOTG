@@ -1,0 +1,9 @@
+enum PRODUCT_CATEGORY{
+
+    NOODLE="NOODLE",
+    RICE="RICE",
+    WESTERN="WESTERN",
+    BEVERAGE="BEVERAGE"
+  }
+  
+  export default PRODUCT_CATEGORY

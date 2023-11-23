@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  firstName String
+  lastName  String
+  email     String   @unique
+  password  String
+  phoneNo   String   @unique
+}
+
+model Cafe {
+  id            String       @id @default(cuid())
+  createdAt     DateTime     @default(now())
+  name          String
+  img           String?      @default("cafe_placeholder_dc8er7")
+  email         String       @unique
+  password      String
+  phoneNo       String       @unique
+  loc           Location     @relation(fields: [locId], references: [id])
+  cafeCategory  CafeCategory @default(FOOD)
+  locId         String
+  operatingHour String
+  status        Boolean      @default(true)
+  products      Product[]
+}
+
+model Rider {
+  id           String       @id @default(cuid())
+  createdAt    DateTime     @default(now())
+  firstName    String
+  lastName     String
+  email        String       @unique
+  password     String
+  phoneNo      String       @unique
+  deliveryMode DeliveryMode
+  vehicleNo    String?
+}
+
+model Product {
+  id              String          @id @default(cuid())
+  createdAt       DateTime        @default(now())
+  name            String
+  img             String
+  productCategory ProductCategory
+  desc            String?
+  price           Decimal
+  availability    Boolean         @default(true)
+  cafe            Cafe            @relation(fields: [cafeId], references: [id])
+  cafeId          String
+  OrderLine       OrderLine[]
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  createdAt  DateTime    @default(now())
+  totalPrice Decimal
+  status     String
+  intent_id  String?     @unique
+  OrderLine  OrderLine[]
+}
+
+model OrderLine {
+  id          String  @id @default(cuid())
+  product     Product @relation(fields: [productId], references: [id])
+  productId   String
+  order       Order   @relation(fields: [orderId], references: [id])
+  orderId     String
+  quantity    Int
+  studentNote String?
+}
+
+model Location {
+  id       String @id @default(cuid())
+  location String
+  Cafe     Cafe[]
+}
+
+enum CafeCategory {
+  FOOD
+  BEVERAGE
+  BOTH
+}
+
+enum ProductCategory {
+  NOODLE
+  RICE
+  WESTERN
+  BEVERAGE
+}
+
+enum DeliveryMode {
+  CAR
+  MOTORCYCLE
+  BYFOOT
+}
