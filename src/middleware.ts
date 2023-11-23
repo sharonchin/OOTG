@@ -39,7 +39,7 @@ export async function middleware(req: NextRequest) {
   }
 
   const response = NextResponse.next();
-  req.headers.get("origin");
+  const origin = req.nextUrl.origin;
 
   if (allowedOrigins.includes(origin)) {
     response.headers.append("Access-Control-Allow-Origin", origin);
