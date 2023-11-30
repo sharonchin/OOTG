@@ -1,3 +1,6 @@
+import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
+import { Cafe } from "./Cafe.type";
+
 export type Product = {
   id: string;
   createdAt: string;
@@ -7,11 +10,38 @@ export type Product = {
   desc: string;
   price: number;
   availability: boolean;
+  cafeId: string;
+  cafe: Cafe;
 };
 
-export interface ProductResponse{
-  status:string;
-  data:{
-      product:Product;
+export interface ProductResponse {
+  status: string;
+  data: {
+    product: Product;
   };
+}
+export interface CartItemType {
+  id: string;
+  name: string;
+  price: number;
+  img: string;
+  amount: number;
+  quantity: number;
+  noteToCafe: string;
+  cafeId: string;
+  cafe: Cafe;
+}
+
+export interface CartType {
+  products: CartItemType[];
+  totalItems: number;
+  totalPrice: number;
+  deliveryOption: DELIVERY_OPTION;
+}
+
+export interface ActionTypes {
+  addToCart: (item: CartItemType) => void;
+  removeFromCart: (item: CartItemType) => void;
+  selectDeliveryOption: (option: DELIVERY_OPTION) => void;
+  reset: () => void;
 }

@@ -1,0 +1,6 @@
+enum DELIVERY_OPTION {
+  DELIVERY = "DELIVERY",
+  PICKUP = "PICKUP",
+}
+
+export default DELIVERY_OPTION;

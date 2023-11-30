@@ -17,32 +17,28 @@ import DeliveryOption from "@/components/DeliveryOption";
 import PaymentType from "@/components/PaymentType";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useRouter } from "next/navigation";
+import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import STATUS from "@/constants/STATUS";
+import { Order } from "@/types/Order.type";
 
 import {
   Breadcrumbs,
   Button,
+  Checkbox,
   Divider,
   Grid,
+  IconButton,
   InputLabel,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import Link from "next/link";
 import { Payment } from "@mui/icons-material";
-import Order from "../orders/[id]/page";
-
-function createData(
-  product: string,
-  unitPrice: number,
-  quantity: number,
-  price: number
-) {
-  return { product, unitPrice, quantity, price };
-}
-
-const rows = [
-  createData("Laksa", 12, 1, 12),
-  createData("Curry Chicken", 10, 1, 10),
-];
+import { useCartStore } from "@/cart";
+import { useEffect } from "react";
+import useSession from "@/lib/useSession";
+import PAYMENT_TYPE from "@/constants/PAYMENT_TYPE";
+import PayPage from "@/components/Pay";
 
 const style = {
   position: "absolute" as "absolute",
@@ -60,55 +56,118 @@ const selectedStyle = {
   backgroundColor: "#778CCC",
 };
 
-const steps = [
-  "Select Delivery Address",
-  "Select Payment Type",
-  "Stripe",
-  "Order Sent",
-];
-
-const getStepContent = (
-  step: number,
-  setActiveStep: (i: number) => void,
-  paymentValue: number,
-  setPaymentValue: (i: number) => void
-  // handleNext:()=> void,
-  // handleBack:()=> void,
-) => {
-  switch (step) {
-    case 0:
-      return <DeliveryOption />;
-    case 1:
-      return (
-        <PaymentType
-          paymentValue={paymentValue}
-          setPaymentValue={setPaymentValue}
-        />
-      );
-    case 2:
-      return <div>Stripe</div>;
-    case 3:
-      return (
-        <div className="flex flex-col items-center pt-5">
-          <CheckCircleIcon sx={{ fontSize: 80 }} color="primary" />
-          <h1>Success</h1>
-        </div>
-      );
-    default:
-      <div>Why you here bro? jalan la</div>;
-  }
-};
-
 export default function Cart() {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => {
+  const handleClose = (event: any, reason: any) => {
+    if (reason && reason == "backdropClick") return;
     setOpen(false);
     handleReset();
   };
+
+  const [checked, setChecked] = React.useState(true);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setChecked(event.target.checked);
+  };
+
+  const [order, setOrder] = React.useState<Order>({} as Order);
+  const [note, setNote] = React.useState<string>("-");
+
+  const stepsPickUp = ["Select Payment Type", "Stripe", "Order Sent"];
+
+  const stepsDelivery = [
+    "Select delivery address",
+    "Select Payment Type",
+    "Stripe",
+    "Order Sent",
+  ];
+
+  const getStepContentDelivery = (
+    step: number,
+    setActiveStep: (i: number) => void,
+    paymentValue: number,
+    setPaymentValue: (i: number) => void
+    // handleNext:()=> void,
+    // handleBack:()=> void,
+  ) => {
+    switch (step) {
+      case 0:
+        return <DeliveryOption />;
+      case 1:
+        return (
+          <PaymentType
+            paymentValue={paymentValue}
+            setPaymentValue={setPaymentValue}
+          />
+        );
+      case 2:
+        return (
+          <div className="flex justify-center items-center pt-4">
+            <Button variant="contained" style={selectedStyle}>
+              Proceed to payment gateway
+            </Button>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="flex flex-col items-center pt-5">
+            <CheckCircleIcon sx={{ fontSize: 80 }} color="primary" />
+            <h1>Success</h1>
+          </div>
+        );
+      default:
+        <div>Why you here bro? jalan la</div>;
+    }
+  };
+
+  const getStepContentPickUp = (
+    step: number,
+    setActiveStep: (i: number) => void,
+    paymentValue: number,
+    setPaymentValue: (i: number) => void
+    // handleNext:()=> void,
+    // handleBack:()=> void,
+  ) => {
+    switch (step) {
+      case 0:
+        return (
+          <PaymentType
+            paymentValue={paymentValue}
+            setPaymentValue={setPaymentValue}
+          />
+        );
+      case 1:
+        return (
+          <div className="flex justify-center items-center pt-5">
+            <Button
+              variant="contained"
+              style={selectedStyle}
+              onClick={() => {
+                router.push(`/pay/${order?.id}`);
+              }}
+            >
+              Proceed to Payment Gateway
+            </Button>
+          </div>
+        );
+      case 2:
+        return (
+          <div className="flex flex-col items-center pt-5">
+            <CheckCircleIcon sx={{ fontSize: 80 }} color="primary" />
+            <h1>Success</h1>
+          </div>
+        );
+      default:
+        <div>Why you here bro? jalan la</div>;
+    }
+  };
+
   const router = useRouter();
+  const student = useSession();
+
   const handleFinish = () => {
-    router.push(`/orders/1`);
+    router.push(`/orders/${order?.id}`);
   };
   const [activeStep, setActiveStep] = React.useState(0);
   // const [skipped, setSkipped] = React.useState(new Set<number>());
@@ -122,7 +181,11 @@ export default function Cart() {
   //   return skipped.has(step);
   // };
 
-  const handleNext = () => {
+  const handleTest = () => {
+    console.log("halo");
+    handleNextPickUp();
+  };
+  const handleNextDelivery = () => {
     // let newSkipped = skipped;
     // if (isStepSkipped(activeStep)) {
     //   newSkipped = new Set(newSkipped.values());
@@ -130,6 +193,21 @@ export default function Cart() {
     // }
     if (activeStep === 1 && paymentValue === 0) {
       setActiveStep(3);
+    } else {
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    }
+
+    // setSkipped(newSkipped);
+  };
+
+  const handleNextPickUp = () => {
+    // let newSkipped = skipped;
+    // if (isStepSkipped(activeStep)) {
+    //   newSkipped = new Set(newSkipped.values());
+    //   newSkipped.delete(activeStep);
+    // }
+    if (activeStep === 0 && paymentValue === 0) {
+      setActiveStep(2);
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
@@ -160,6 +238,45 @@ export default function Cart() {
     setActiveStep(0);
     setPaymentValue(1);
   };
+
+  const {
+    products,
+    totalItems,
+    totalPrice,
+    deliveryOption,
+    removeFromCart,
+    reset,
+  } = useCartStore();
+  useEffect(() => {
+    useCartStore.persist.rehydrate();
+  }, []);
+
+  const handleCheckout = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          totalPrice,
+          products,
+          status: "DRAFT" as STATUS,
+          studentId: student?.id,
+          cafeId: products[0]?.cafeId,
+          deliveryOption,
+          paymentType:
+            paymentValue === 0
+              ? ("CASH" as PAYMENT_TYPE)
+              : ("ONLINE" as PAYMENT_TYPE),
+        }),
+      });
+      setOrder(await res.json());
+      console.log(order);
+      reset();
+      handleNextPickUp();
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="p-20 flex flex-col justify-center">
       <div className="flex flex-row justify-center items-center">
@@ -167,6 +284,7 @@ export default function Cart() {
           <Link href="/" className="[#778CCC]">
             <h1>Home</h1>
           </Link>
+
           <h1>Checkout</h1>
           {/* <Typography color="text.primary">KKTM</Typography> */}
         </Breadcrumbs>
@@ -176,24 +294,46 @@ export default function Cart() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Product</TableCell>
+              <TableCell align="left">Image</TableCell>
+              <TableCell align="center">Product</TableCell>
               <TableCell align="center">Unit Price</TableCell>
               <TableCell align="center">Quantity</TableCell>
-              <TableCell align="center">Price</TableCell>
+              <TableCell align="center">Amount</TableCell>
+              <TableCell align="center">Note to rider</TableCell>
+              <TableCell align="center">Remove</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
+            {products.map((row) => (
               <TableRow
-                key={row.product}
+                key={row.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell component="th" scope="row">
-                  {row.product}
+                <TableCell align="center" component="th" scope="row">
+                  <img
+                    src={`https://res.cloudinary.com/devlognxn/image/upload/v1699984254/${row.img}.jpg`}
+                    alt={row.name}
+                    width={100}
+                    height={100}
+                  />
                 </TableCell>
-                <TableCell align="center">{row.unitPrice}</TableCell>
+                <TableCell align="center">{row.name}</TableCell>
+                <TableCell align="center">RM{row.price}</TableCell>
                 <TableCell align="center">{row.quantity}</TableCell>
-                <TableCell align="center">{row.price}</TableCell>
+                <TableCell align="center">RM {row.amount}</TableCell>
+                <TableCell align="center">{row.noteToCafe}</TableCell>
+
+                <TableCell align="center">
+                  <Tooltip title="Delete">
+                    <IconButton
+                      onClick={() => {
+                        removeFromCart(row);
+                      }}
+                    >
+                      <DeleteOutlineOutlinedIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -203,7 +343,11 @@ export default function Cart() {
       <Grid container spacing={4}>
         <Grid item xs={6} sx={{ alignItems: "center" }}>
           <div className="flex flex-col pt-5 gap-5 w-1/2">
-            <TextField label="Note to Cafe" />
+            <Checkbox
+              checked={checked}
+              onChange={handleChange}
+              inputProps={{ "aria-label": "controlled" }}
+            />
             <h1>You have available voucher,do you wish to apply?</h1>
             <div className="flex flex-row gap-10">
               <TextField
@@ -217,11 +361,12 @@ export default function Cart() {
         </Grid>
         <Grid item xs={6} sx={{ justifyContent: "center", display: "flex" }}>
           <div className="flex flex-col pt-5 gap-5">
-            <h1>Subtotal: RM22.00</h1>
+            <h1>Subtotal ({totalItems} items)</h1>
+            <h1>RM({totalPrice})</h1>
             <h1>Shipping Fee: RM2.00</h1>
-            <h1>Discount Applied: RM0.80</h1>
+            <h1>Discount Applied: -</h1>
             <Divider />
-            <h1>TOTAL : RM23.20</h1>
+            <h1>TOTAL : RM{totalPrice + 2}</h1>
             <Button
               variant="contained"
               style={selectedStyle}
@@ -238,32 +383,103 @@ export default function Cart() {
           onClose={handleClose}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
+          disableEscapeKeyDown
         >
           <Box sx={style}>
             <h1>Make Payment</h1>
             <Box sx={{ width: "100%" }}>
               <Stepper activeStep={activeStep}>
-                {steps.map((label, index) => {
-                  const stepProps: { completed?: boolean } = {};
-                  const labelProps: {
-                    optional?: React.ReactNode;
-                  } = {};
-                  // if (isStepOptional(index)) {
-                  //   labelProps.optional = (
-                  //     <Typography variant="caption">Optional</Typography>
-                  //   );
-                  // }
-                  // if (isStepSkipped(index)) {
-                  //   stepProps.completed = false;
-                  // }
-                  return (
-                    <Step key={label} {...stepProps}>
-                      <StepLabel {...labelProps}>{label}</StepLabel>
-                    </Step>
-                  );
-                })}
+                {deliveryOption === "DELIVERY"
+                  ? stepsDelivery.map((label, index) => {
+                      const stepProps: { completed?: boolean } = {};
+                      const labelProps: {
+                        optional?: React.ReactNode;
+                      } = {};
+                      // if (isStepOptional(index)) {
+                      //   labelProps.optional = (
+                      //     <Typography variant="caption">Optional</Typography>
+                      //   );
+                      // }
+                      // if (isStepSkipped(index)) {
+                      //   stepProps.completed = false;
+                      // }
+                      return (
+                        <Step key={label} {...stepProps}>
+                          <StepLabel {...labelProps}>{label}</StepLabel>
+                        </Step>
+                      );
+                    })
+                  : stepsPickUp.map((label, index) => {
+                      const stepProps: { completed?: boolean } = {};
+                      const labelProps: {
+                        optional?: React.ReactNode;
+                      } = {};
+                      // if (isStepOptional(index)) {
+                      //   labelProps.optional = (
+                      //     <Typography variant="caption">Optional</Typography>
+                      //   );
+                      // }
+                      // if (isStepSkipped(index)) {
+                      //   stepProps.completed = false;
+                      // }
+                      return (
+                        <Step key={label} {...stepProps}>
+                          <StepLabel {...labelProps}>{label}</StepLabel>
+                        </Step>
+                      );
+                    })}
               </Stepper>
-              {activeStep === steps.length ? (
+              {deliveryOption === "DELIVERY" ? (
+                activeStep === stepsDelivery.length ? (
+                  <React.Fragment>
+                    <Typography sx={{ mt: 2, mb: 1 }}>Success</Typography>
+                    <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                      <Box sx={{ flex: "1 1 auto" }} />
+                      <Button onClick={handleReset}>Reset</Button>
+                    </Box>
+                  </React.Fragment>
+                ) : (
+                  <React.Fragment>
+                    {getStepContentDelivery(
+                      activeStep,
+                      setActiveStep,
+                      paymentValue,
+                      setPaymentValue
+                    )}
+                    <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
+                      <Button
+                        color="inherit"
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        sx={{ mr: 1 }}
+                      >
+                        Back
+                      </Button>
+                      <Box sx={{ flex: "1 1 auto" }} />
+                      {/* {isStepOptional(activeStep) && (
+              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
+                Skip
+              </Button>
+            )} */}
+
+                      {/* <Link href={`/orders/${Order.id}`}> */}
+
+                      <Button
+                        onClick={
+                          activeStep === stepsDelivery.length - 1
+                            ? handleFinish
+                            : handleNextDelivery
+                        }
+                      >
+                        {activeStep === stepsDelivery.length - 1
+                          ? "Finish"
+                          : "Next"}
+                      </Button>
+                      {/* </Link> */}
+                    </Box>
+                  </React.Fragment>
+                )
+              ) : activeStep === stepsPickUp.length ? (
                 <React.Fragment>
                   <Typography sx={{ mt: 2, mb: 1 }}>Success</Typography>
                   <Box sx={{ display: "flex", flexDirection: "row", pt: 2 }}>
@@ -273,7 +489,7 @@ export default function Cart() {
                 </React.Fragment>
               ) : (
                 <React.Fragment>
-                  {getStepContent(
+                  {getStepContentPickUp(
                     activeStep,
                     setActiveStep,
                     paymentValue,
@@ -299,12 +515,16 @@ export default function Cart() {
 
                     <Button
                       onClick={
-                        activeStep === steps.length - 1
+                        activeStep === stepsPickUp.length - 1
                           ? handleFinish
-                          : handleNext
+                          : activeStep === 0
+                          ? handleCheckout
+                          : handleNextPickUp
                       }
                     >
-                      {activeStep === steps.length - 1 ? "Finish" : "Next"}
+                      {activeStep === stepsPickUp.length - 1
+                        ? "Finish"
+                        : "Next"}
                     </Button>
                     {/* </Link> */}
                   </Box>
@@ -317,11 +537,3 @@ export default function Cart() {
     </div>
   );
 }
-
-// const CartPage = () =>{
-//     return(
-//         <div>Cart Page</div>
-//     )
-// }
-
-// export default CartPage

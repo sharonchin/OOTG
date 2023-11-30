@@ -6,18 +6,25 @@ import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import Link from "next/link";
-import { Button, IconButton, Menu, MenuItem } from "@mui/material";
-import React from "react";
+import { Button, IconButton, Menu, MenuItem, Badge } from "@mui/material";
+import React, { useEffect } from "react";
 import useSession from "@/lib/useSession";
 import Loading from "./Loading";
 import useStore from "@/store";
 import { apiLogoutStudent } from "@/lib/api-requests";
 import { useRouter } from "next/navigation";
+import { useCartStore } from "@/cart";
+import GradingIcon from "@mui/icons-material/Grading";
 
 export default function Header() {
   const store = useStore();
   const user = useSession();
   const router = useRouter();
+  const { totalItems } = useCartStore();
+
+  useEffect(() => {
+    useCartStore.persist.rehydrate();
+  }, []);
 
   const handleLogout = async () => {
     store.setRequestLoading(true);
@@ -50,9 +57,24 @@ export default function Header() {
         </div>
 
         <div className="flex">
+          <Link href={`/orders`}>
+            <IconButton color="secondary">
+              <GradingIcon className=" text-white" />
+            </IconButton>
+          </Link>
+
           <Link href={`/cart`}>
             <IconButton color="secondary" aria-label="add to shopping cart">
-              <ShoppingBagOutlinedIcon className=" text-white" />
+              <Badge
+                badgeContent={totalItems}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
+                }}
+                color="error"
+              >
+                <ShoppingBagOutlinedIcon className=" text-white" />
+              </Badge>
             </IconButton>
           </Link>
 

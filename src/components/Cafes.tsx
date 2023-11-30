@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ButtonGroup, Button } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { Cafe } from "@/types/Cafe.type";
 import { Product } from "@/types/Product.type";
@@ -10,10 +10,17 @@ import CafeCard from "./CafeCard";
 import { apiGetAllCafe } from "@/lib/api-requests";
 import useStore from "@/store";
 import Loading from "./Loading";
+import { useCartStore } from "@/cart";
+import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
 
 const Cafes = () => {
   const [cafes, setCafes] = React.useState<Cafe[]>([] as Cafe[]);
   const store = useStore();
+  const { selectDeliveryOption } = useCartStore();
+
+  useEffect(() => {
+    useCartStore.persist.rehydrate();
+  }, []);
 
   const getCafe = async () => {
     store.setRequestLoading(true);
@@ -44,7 +51,9 @@ const Cafes = () => {
 
   // const products: Product[] = await getProduct();
 
-  const [selectedButton, setSelectedButton] = React.useState("Delivery"); // State to manage the selected button
+  const [selectedButton, setSelectedButton] = React.useState<DELIVERY_OPTION>(
+    "DELIVERY" as DELIVERY_OPTION
+  ); // State to manage the selected button
 
   const selectedStyle = {
     backgroundColor: "#778CCC",
@@ -54,8 +63,9 @@ const Cafes = () => {
     backgroundColor: "transparent",
   };
 
-  const handleButtonClick = (button: any) => {
-    setSelectedButton(button === selectedButton ? "" : button);
+  const handleButtonClick = (button: DELIVERY_OPTION) => {
+    setSelectedButton(button === selectedButton ? selectedButton : button);
+    selectDeliveryOption(button);
   };
   const router = useRouter();
   return (
@@ -65,19 +75,19 @@ const Cafes = () => {
         {/*Top*/}
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <Button
-            onClick={() => handleButtonClick("Delivery")}
-            variant={selectedButton === "Delivery" ? "contained" : "outlined"}
+            onClick={() => handleButtonClick("DELIVERY" as DELIVERY_OPTION)}
+            variant={selectedButton === "DELIVERY" ? "contained" : "outlined"}
             style={
-              selectedButton === "Delivery" ? selectedStyle : notSelectedStyle
+              selectedButton === "DELIVERY" ? selectedStyle : notSelectedStyle
             }
           >
             Delivery
           </Button>
           <Button
-            onClick={() => handleButtonClick("Pick Up")}
-            variant={selectedButton === "Pick Up" ? "contained" : "outlined"}
+            onClick={() => handleButtonClick("PICKUP" as DELIVERY_OPTION)}
+            variant={selectedButton === "PICKUP" ? "contained" : "outlined"}
             style={
-              selectedButton === "Pick Up" ? selectedStyle : notSelectedStyle
+              selectedButton === "PICKUP" ? selectedStyle : notSelectedStyle
             }
           >
             Pick Up

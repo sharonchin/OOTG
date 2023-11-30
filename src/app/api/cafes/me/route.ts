@@ -3,7 +3,7 @@ import prisma from "@/utils/connect";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
-  const cafeId = req.cookies.get("X-USER-ID")?.value;
+  const cafeId = req.headers.get("X-USER-ID");
 
   if (!cafeId) {
     return getErrorResponse(

@@ -18,6 +18,7 @@ model Student {
   email     String   @unique
   password  String
   phoneNo   String   @unique
+  Order     Order[]
 }
 
 model Cafe {
@@ -34,6 +35,7 @@ model Cafe {
   operatingHour String
   status        Boolean      @default(true)
   products      Product[]
+  order         Order[]
 }
 
 model Rider {
@@ -59,27 +61,35 @@ model Product {
   availability    Boolean         @default(true)
   cafe            Cafe            @relation(fields: [cafeId], references: [id])
   cafeId          String
-  OrderLine       OrderLine[]
+  // OrderLine       OrderLine[]
 }
 
 model Order {
-  id         String      @id @default(cuid())
-  createdAt  DateTime    @default(now())
-  totalPrice Decimal
-  status     String
-  intent_id  String?     @unique
-  OrderLine  OrderLine[]
+  id             String         @id @default(cuid())
+  createdAt      DateTime       @default(now())
+  totalPrice     Decimal
+  products       Json[]
+  status         Status
+  intentId       String?        @unique
+  student        Student        @relation(fields: [studentId], references: [id])
+  studentId      String
+  paymentType    PaymentType
+  cafe           Cafe           @relation(fields: [cafeId], references: [id])
+  cafeId         String
+  cutleryOption  Boolean?       @default(false)
+  deliveryOption DeliveryOption
+  // OrderLine  OrderLine[]
 }
 
-model OrderLine {
-  id          String  @id @default(cuid())
-  product     Product @relation(fields: [productId], references: [id])
-  productId   String
-  order       Order   @relation(fields: [orderId], references: [id])
-  orderId     String
-  quantity    Int
-  studentNote String?
-}
+// model OrderLine {
+//   id          String  @id @default(cuid())
+//   product     Product @relation(fields: [productId], references: [id])
+//   productId   String
+//   order       Order   @relation(fields: [orderId], references: [id])
+//   orderId     String
+//   quantity    Int
+//   studentNote String?
+// }
 
 model Location {
   id       String @id @default(cuid())
@@ -104,4 +114,22 @@ enum DeliveryMode {
   CAR
   MOTORCYCLE
   BYFOOT
+}
+
+enum Status {
+  DRAFT
+  PREPARING
+  PICKUP
+  DELIVERING
+  COMPLETED
+}
+
+enum PaymentType {
+  CASH
+  ONLINE
+}
+
+enum DeliveryOption {
+  DELIVERY
+  PICKUP
 }

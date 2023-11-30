@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       data: {
         img: data.img,
         name: data.name,
-        price: data.price,
+        price: data.price as number,
         desc: data.desc as string,
         productCategory: data.productCategory,
         cafeId: data.cafeId,

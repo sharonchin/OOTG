@@ -15,7 +15,7 @@ import { NextRequest, NextResponse } from "next/server";
 // }
 
 export async function GET(req: NextRequest) {
-  const riderId = req.cookies.get("X-USER-ID")?.value;
+  const riderId = req.headers.get("X-USER-ID");
 
   if (!riderId) {
     return getErrorResponse(

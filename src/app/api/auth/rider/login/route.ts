@@ -68,11 +68,11 @@ export async function POST(req: NextRequest) {
         maxAge: tokenMaxAge,
       }),
 
-      response.cookies.set({
-        name: "X-USER-ID",
-        value: rider.id,
-        maxAge: tokenMaxAge,
-      }),
+      // response.cookies.set({
+      //   name: "X-USER-ID",
+      //   value: rider.id,
+      //   maxAge: tokenMaxAge,
+      // }),
     ]);
     return response;
   } catch (error: any) {

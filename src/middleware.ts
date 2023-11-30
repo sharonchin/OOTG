@@ -8,7 +8,11 @@ interface AuthenticatedRequest extends NextRequest {
   };
 }
 
-const allowedOrigins = ["http://localhost:3001", "http://localhost:3002"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+];
 
 let redirectToLogin = false;
 export async function middleware(req: NextRequest) {
@@ -39,7 +43,10 @@ export async function middleware(req: NextRequest) {
   }
 
   const response = NextResponse.next();
-  req.headers.get("origin");
+
+  const origin = req.nextUrl.origin;
+
+  console.log(`origin: ${origin}`);
 
   if (allowedOrigins.includes(origin)) {
     response.headers.append("Access-Control-Allow-Origin", origin);
@@ -106,6 +113,6 @@ export const config = {
     "/cart",
     "/cafe/:path*",
     "/api/auth/rider/:path*",
-    "/api/:path*",
+    "/foodiepassport",
   ],
 };

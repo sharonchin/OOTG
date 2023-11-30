@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import {
   Breadcrumbs,
   Button,
@@ -9,8 +10,38 @@ import {
 } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Product } from "@/types/Product.type";
+import { useCartStore } from "@/cart";
+import toast from "react-hot-toast";
 
-const SingleProductPage = async ({ params }: { params: { id: string } }) => {
+const SingleProductPage = ({ params }: { params: { id: string } }) => {
+  const [product, setProduct] = useState<Product>({} as Product);
+  const [total, setTotal] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [note, setNote] = useState<string>("-");
+  const { addToCart } = useCartStore();
+
+  useEffect(() => {
+    useCartStore.persist.rehydrate();
+  }, []);
+
+  useEffect(() => {
+    setTotal(quantity * product?.price);
+  }, [product, quantity]);
+  const handleCart = () => {
+    addToCart({
+      id: product.id,
+      name: product.name,
+      img: product.img,
+      price: product.price,
+      amount: total,
+      quantity: quantity,
+      noteToCafe: note,
+      cafeId: product.cafeId,
+      cafe: product.cafe,
+    });
+    toast.success("The item is added to cart!");
+  };
+
   const getData = async () => {
     const res = await fetch(`http://localhost:3000/api/product/${params.id}`, {
       cache: "no-store",
@@ -19,17 +50,20 @@ const SingleProductPage = async ({ params }: { params: { id: string } }) => {
       console.log(res);
       throw new Error("Screwed up");
     }
-    return res.json();
+    setProduct(await res.json());
+    setTotal(product?.price);
   };
 
-  const product: Product = await getData();
-
+  useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="flex flex-col justify-center">
       {/* <div className="flex flex-row justify-center items-center">
         <Breadcrumbs aria-label="breadcrumb">
-          <Link className="[#778CCC]">Home</Link>
-          <Link>Cafe A</Link>
+          <Link className="[#778CCC]">Home</Link>`
+          <Link>Cafe A</Link>––––
           <Typography color="text.primary">KKTM</Typography> */}
       {/* </Breadcrumbs> */}
       {/* </div> */}
@@ -60,16 +94,37 @@ const SingleProductPage = async ({ params }: { params: { id: string } }) => {
             <Divider sx={{ pb: 4 }} />
           </div>
           <div className="pt-5 pb-5">
-            <TextField fullWidth label="Note to Cafe" />
+            <TextField
+              fullWidth
+              label="Note to Cafe"
+              value={note}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                setNote(event.target.value);
+              }}
+            />
           </div>
 
           <div className="flex flex-row gap-20">
             <div className="flex flex-row gap-5 items-center">
-              <button>{"-"}</button>
-              <h1>1</h1>
-              <button>{"+"}</button>
+              <button
+                onClick={() =>
+                  setQuantity((prev: number) => (prev > 1 ? prev - 1 : 1))
+                }
+              >
+                {"-"}
+              </button>
+              <h1>{quantity}</h1>
+              <button
+                onClick={() =>
+                  setQuantity((prev: number) => (prev < 9 ? prev + 1 : 9))
+                }
+              >
+                {"+"}
+              </button>
             </div>
-            <Button endIcon={<ShoppingCartOutlinedIcon />}>Add To Cart</Button>
+            <Button onClick={handleCart} endIcon={<ShoppingCartOutlinedIcon />}>
+              Add To Cart
+            </Button>
           </div>
         </div>
       </div>

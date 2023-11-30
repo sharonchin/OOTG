@@ -15,22 +15,8 @@ import SentimentSatisfiedIcon from "@mui/icons-material/SentimentSatisfied";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
 import Link from "next/link";
-
-type OrderLine = {
-  id: number;
-  p1: string;
-  quantity: number;
-  price1: string;
-  loc: string;
-};
-
-const Order: OrderLine = {
-  id: 1,
-  p1: "Laksa",
-  price1: "RM5",
-  quantity: 1,
-  loc: "KKE",
-};
+import toast from "react-hot-toast";
+import { Order } from "@/types/Order.type";
 
 const style = {
   position: "absolute" as "absolute",
@@ -48,12 +34,46 @@ const selectedStyle = {
   backgroundColor: "#778CCC",
 };
 
-const OrderDetails = () => {
+const OrderDetails = ({ params }: { params: { id: string } }) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
   };
+
+  const [order, setOrder] = React.useState<Order>({} as Order);
+
+  const getData = async () => {
+    const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed up");
+    }
+    setOrder(await res.json());
+  };
+
+  const updateToComplete = async () => {
+    const res = await fetch(
+      `http://localhost:3000/api/orders/updateToComplete/${params.id}`,
+      {
+        method: "PUT",
+      }
+    );
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed Up");
+    }
+
+    toast.success("Status Updated Successfully");
+    return handleOpen();
+  };
+
+  React.useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Box
@@ -90,30 +110,34 @@ const OrderDetails = () => {
             sx={{ display: "flex", justifyContent: "center", width: "100%" }}
           >
             <Grid container>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                xs={6}
-              >
-                <h1>
-                  {Order.quantity} x {Order.p1}
-                </h1>
-              </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                xs={6}
-              >
-                <h1>{Order.price1}</h1>
-              </Grid>
+              {order?.products?.map((row) => (
+                <>
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    xs={6}
+                  >
+                    <h1>
+                      {row.quantity} x {row.name}
+                    </h1>
+                  </Grid>
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    xs={6}
+                  >
+                    <h1>{row.amount}</h1>
+                  </Grid>
+                </>
+              ))}
               <Grid
                 item
                 sx={{
@@ -134,7 +158,7 @@ const OrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1>{Order.price1}</h1>
+                <h1>{order?.totalPrice}</h1>
               </Grid>
               <Grid
                 item
@@ -200,7 +224,7 @@ const OrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1 className="text-xl font-bold">RM5</h1>
+                <h1 className="text-xl font-bold">RM{order?.totalPrice}</h1>
               </Grid>
               <Grid
                 item
@@ -212,7 +236,7 @@ const OrderDetails = () => {
                 }}
                 xs={12}
               >
-                <h1>Delivered to: {Order.loc}</h1>
+                <h1>Pick up at: {order?.cafe?.loc.location}</h1>
               </Grid>
               <Grid
                 item
@@ -224,7 +248,7 @@ const OrderDetails = () => {
                 }}
                 xs={12}
               >
-                <h1>Note to Rider: wait me outside library</h1>
+                <h1>Note to Rider: - </h1>
               </Grid>
               <Grid
                 item
@@ -238,7 +262,7 @@ const OrderDetails = () => {
               >
                 <CustomizedSwitches
                   label="Order Received"
-                  handleOpen={handleOpen}
+                  handleOpen={updateToComplete}
                 />
               </Grid>
               <Grid
