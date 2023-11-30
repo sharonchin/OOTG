@@ -1,6 +1,6 @@
 "use client";
 import { InputAdornment, TextField } from "@mui/material";
-import chef from "./../../public/assets/chef.png";
+import chef from "./../../../public/assets/chef.png";
 import Image from "next/image";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import useSession from "@/lib/useSession";

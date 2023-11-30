@@ -7,6 +7,7 @@ import {
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
+import USERTYPE from "@/constants/USERTYPE";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,12 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await hash(data.password, 12);
 
+    const user = await prisma.user.create({
+      data: {
+        userType: "STUDENT" as USERTYPE
+      }
+    })
+
     const student = await prisma.student.create({
       data: {
         firstName: data.firstName,
@@ -22,6 +29,7 @@ export async function POST(req: NextRequest) {
         email: data.email,
         password: hashedPassword,
         phoneNo: data.phoneNo,
+        userId: user.id
       },
     });
 

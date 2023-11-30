@@ -164,7 +164,6 @@ export async function apiRegisterRider(
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "http://localhost:3002",
     },
     body: credentials,
   });
@@ -180,7 +179,6 @@ export async function apiLoginRider(credentials: string): Promise<string> {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "http://localhost:3002",
     },
     body: credentials,
   });
@@ -196,7 +194,6 @@ export async function apiLogoutRider(): Promise<void> {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "http://localhost:3002",
     },
   });
 

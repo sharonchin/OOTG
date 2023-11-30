@@ -6,18 +6,6 @@ import { compare } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:3001",
-  "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
-  "Access-Control-Allow-Credentials": "true",
-};
-
-export async function OPTIONS(req: NextRequest) {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
-
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as LoginCafeInput;
@@ -33,7 +21,7 @@ export async function POST(req: NextRequest) {
     const JWT_EXPIRES_IN = getEnvVariable("JWT_EXPIRES_IN");
 
     const token = await signJWT(
-      { sub: cafe.id },
+      { sub: cafe.userId },
       { exp: `${JWT_EXPIRES_IN}m` }
     );
 

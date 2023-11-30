@@ -8,6 +8,7 @@ export interface FilteredRider {
     phoneNo: string;
     deliveryMode: string;
     vehicleNo: string;
+    userId: string;
   }
   
   export interface RiderResponse {

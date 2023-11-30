@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
       rider: true,
     },
   });
-
+  console.log(userId);
   return NextResponse.json({
     status: "success",
     data: { user: user },

@@ -7,18 +7,7 @@ import {
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:3001",
-  "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
-  "Access-Control-Allow-Credentials": "true",
-};
-
-export async function OPTIONS(req: NextRequest) {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
+import USERTYPE from "@/constants/USERTYPE";
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,6 +15,12 @@ export async function POST(req: NextRequest) {
     const data = RegisterCafeSchema.parse(body);
 
     const hashedPassword = await hash(data.password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        userType: "CAFE" as USERTYPE,
+      },
+    });
 
     const cafe = await prisma.cafe.create({
       data: {
@@ -37,6 +32,7 @@ export async function POST(req: NextRequest) {
         locId: data.locId,
         operatingHour: data.operatingHour,
         cafeCategory: data.cafeCategory,
+        userId: user.id,
       },
     });
 

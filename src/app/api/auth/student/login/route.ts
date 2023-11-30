@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const JWT_EXPIRES_IN = getEnvVariable("JWT_EXPIRES_IN");
 
     const token = await signJWT(
-      { sub: student.id },
+      { sub: student.userId },
       { exp: `${JWT_EXPIRES_IN}m` }
     );
 

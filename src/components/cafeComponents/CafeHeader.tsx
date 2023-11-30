@@ -1,5 +1,5 @@
 "use client";
-import OOTG from "./../../public/assets/OOTG.png";
+import OOTG from "./../../../public/assets/ootg.png";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";

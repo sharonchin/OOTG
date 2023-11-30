@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./../globals.css";
 import Header from "@/components/cafeComponents/CafeHeader";
 import Footer from "@/components/shared/Footer";
 import MainMenu from "@/components/cafeComponents/MainMenu";
@@ -23,6 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const user = useSession();
+  console.log(user)
   const auth = Boolean(user?.cafe?.id);
 
   return (

@@ -13,6 +13,7 @@ export type FilteredCafe = {
   cafeCategory: string;
   operatingHour: string;
   status: string;
+  userId: string;
 };
 
 export interface CafeResponse {

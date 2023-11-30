@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./../globals.css";
 import Header from "@/components/riderComponents/RiderHeader";
 import Footer from "@/components/shared/Footer";
 import MainMenu from "@/components/riderComponents/MainMenu";

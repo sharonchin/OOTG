@@ -7,18 +7,8 @@ import {
 import { hash } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
+import USERTYPE from "@/constants/USERTYPE";
 
-// const corsHeaders = {
-//   "Access-Control-Allow-Origin": "*",
-//   "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
-//   "Access-Control-Allow-Headers":
-//     "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
-//   "Access-Control-Allow-Credentials": "false",
-// };
-
-// export async function OPTIONS(req: NextRequest) {
-//   return NextResponse.json({}, { headers: corsHeaders });
-// }
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,6 +16,12 @@ export async function POST(req: NextRequest) {
     const data = RegisterRiderSchema.parse(body);
 
     const hashedPassword = await hash(data.password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        userType: "RIDER" as USERTYPE,
+      },
+    });
 
     const rider = await prisma.rider.create({
       data: {
@@ -36,13 +32,14 @@ export async function POST(req: NextRequest) {
         phoneNo: data.phoneNo,
         deliveryMode: data.deliveryMode,
         vehicleNo: data.vehicleNo,
+        userId: user.id,
       },
     });
 
     return new NextResponse(
       JSON.stringify({
         status: "success",
-        data: { cafe: { ...rider, password: undefined } },
+        data: { rider: { ...rider, password: undefined } },
       }),
       {
         status: 201,

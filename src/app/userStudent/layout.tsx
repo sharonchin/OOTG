@@ -1,7 +1,7 @@
 import { Toaster } from "react-hot-toast";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./../globals.css";
 import Header from "@/components/studentComponents/StudentHeader";
 import Footer from "@/components/shared/Footer";
 import Banner from "@/components/studentComponents/Banner";

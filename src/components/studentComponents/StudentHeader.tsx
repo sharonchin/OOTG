@@ -1,5 +1,5 @@
 "use client";
-import ootg from "./../../public/assets/ootg.png";
+import ootg from "./../../../public/assets/ootg.png";
 import Image from "next/image";
 import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";

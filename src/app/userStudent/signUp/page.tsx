@@ -96,9 +96,8 @@ export default function SignUp() {
           </FormProvider>
           <div className="flex justify-center items-center flex-row pt-10">
             <h1>Already have an account?</h1>
-            <Link href="/">
+            <Link href="/login">
               <h1 className="text-black pl-2">Login</h1>
-              <h1> hoho </h1>
             </Link>
           </div>
         </div>
