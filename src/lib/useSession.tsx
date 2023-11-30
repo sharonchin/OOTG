@@ -1,14 +1,14 @@
 import { useEffect } from "react";
-import { apiGetAuthStudent } from "./api-requests";
+import { apiGetAuthUser } from "./api-requests";
 import useStore from "@/store";
 
 export default function useSession() {
   const store = useStore();
 
-  async function fetchStudent() {
+  async function fetchUser() {
     try {
-      const student = await apiGetAuthStudent();
-      store.setAuthUser(student);
+      const user = await apiGetAuthUser();
+      store.setAuthUser(user);
     } catch (error: any) {
       store.reset();
     }
@@ -16,7 +16,7 @@ export default function useSession() {
 
   useEffect(() => {
     if (!store.authUser) {
-      fetchStudent();
+      fetchUser();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

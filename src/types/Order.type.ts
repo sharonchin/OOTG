@@ -1,8 +1,8 @@
 import STATUS from "@/constants/STATUS";
 import { CartItemType } from "./Product.type";
 import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
-import { FilteredStudent } from "@/lib/types";
-import { Cafe } from "./Cafe.type";
+import { FilteredStudent } from "@/types/Student.type";
+import { FilteredCafe } from "./Cafe.type";
 
 export type Order = {
   id: string;
@@ -16,5 +16,5 @@ export type Order = {
   cafeId: string;
   deliveryOption: DELIVERY_OPTION;
   student: FilteredStudent;
-  cafe: Cafe;
+  cafe: FilteredCafe;
 };

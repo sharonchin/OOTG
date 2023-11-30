@@ -1,0 +1,6 @@
+enum AVAILABILITY{
+  AVAILABLE = 1,
+  UNAVAILABLE = 2
+}
+
+export default AVAILABILITY
