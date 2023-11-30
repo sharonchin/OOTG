@@ -98,6 +98,7 @@ export default function SignUp() {
             <h1>Already have an account?</h1>
             <Link href="/">
               <h1 className="text-black pl-2">Login</h1>
+              <h1> hoho </h1>
             </Link>
           </div>
         </div>
