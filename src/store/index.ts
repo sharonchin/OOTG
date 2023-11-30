@@ -1,23 +1,23 @@
 "use client";
 
-import { FilteredStudent } from "@/lib/types";
-import {create} from "zustand";
+import { User } from "@/types/User.type";
+import { create } from "zustand";
 
-type Store={
-    authUser:FilteredStudent | null;
-    requestLoading:boolean;
-    setAuthUser:(student:FilteredStudent | null) => void;
-    setRequestLoading: (isLoading:boolean)=>void;
-    reset:()=>void;
+type Store = {
+  authUser: User | null;
+  requestLoading: boolean;
+  setAuthUser: (user: User | null) => void;
+  setRequestLoading: (isLoading: boolean) => void;
+  reset: () => void;
 };
 
-const useStore = create<Store>((set)=>({
-    authUser:null,
-    requestLoading:false,
-    setAuthUser:(student)=>set((state)=>({...state,authUser:student})),
-    setRequestLoading:(isLoading)=>
-        set((state)=>({...state,requestLoading:isLoading})),
-    reset:()=> set({authUser:null,requestLoading:false}),
+const useStore = create<Store>((set) => ({
+  authUser: null,
+  requestLoading: false,
+  setAuthUser: (user) => set((state) => ({ ...state, authUser: user })),
+  setRequestLoading: (isLoading) =>
+    set((state) => ({ ...state, requestLoading: isLoading })),
+  reset: () => set({ authUser: null, requestLoading: false }),
 }));
 
 export default useStore;

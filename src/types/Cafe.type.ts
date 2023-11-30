@@ -1,4 +1,4 @@
-export type Cafe = {
+export type FilteredCafe = {
   id: string;
   createdAt: string;
   name: string;
@@ -14,3 +14,20 @@ export type Cafe = {
   operatingHour: string;
   status: string;
 };
+
+export interface CafeResponse {
+  status: string;
+  data: {
+    cafe: FilteredCafe;
+  };
+}
+
+export interface CafeLoginResponse {
+  status: string;
+  token: string;
+}
+
+export interface Location {
+  id: string;
+  location: string;
+}

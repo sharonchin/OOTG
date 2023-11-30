@@ -8,12 +8,6 @@ interface AuthenticatedRequest extends NextRequest {
   };
 }
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://localhost:3002",
-];
-
 let redirectToLogin = false;
 export async function middleware(req: NextRequest) {
   let token: string | undefined;
@@ -43,24 +37,6 @@ export async function middleware(req: NextRequest) {
   }
 
   const response = NextResponse.next();
-
-  const origin = req.nextUrl.origin;
-
-  console.log(`origin: ${origin}`);
-
-  if (allowedOrigins.includes(origin)) {
-    response.headers.append("Access-Control-Allow-Origin", origin);
-  }
-
-  response.headers.append("Access-Control-Allow-Credentials", "true");
-  response.headers.append(
-    "Access-Control-Allow-Methods",
-    "GET,DELETE,PATCH,POST,PUT"
-  );
-  response.headers.append(
-    "Access-Control-Allow-Headers",
-    "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-  );
 
   try {
     if (token) {
@@ -102,17 +78,20 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/profile",
+    "/userStudent/:path*",
+    "/userCafe/:path*",
+    "/userRider/:path*",
     "/login",
-    "/api/students/:path*",
-    "/api/auth/logout",
+    "/api/user/:path*",
+    "/api/auth/student/logout",
+    "/api/auth/cafe/logout",
+    "/api/auth/rider/logout",
     "/",
-    "/product/:path*",
-    "/orders/:path*",
-    "/faq",
-    "/cart",
-    "/cafe/:path*",
-    "/api/auth/rider/:path*",
-    "/foodiepassport",
+    // "/product/:path*",
+    // "/orders/:path*",
+    // "/faq",
+    // "/cart",
+    // "/cafe/:path*",
+    // "/foodiepassport",
   ],
 };
