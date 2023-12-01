@@ -1,9 +1,8 @@
-import { Toaster } from "react-hot-toast";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/cafeComponents/CafeHeader";
-import Footer from "@/components/shared/Footer";
+import AuthClientLayout from "@/components/shared/AuthClientLayout";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,15 +19,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex flex-col justify-between h-screen">
-          <Toaster position="top-center" />
-
-          <Header />
-          <div className="flex flex-col justify-center items-center pt-10">
-            {children}
-          </div>
-          <Footer />
-        </div>
+        <Toaster position="top-center" />
+        <AuthClientLayout>{children}</AuthClientLayout>
       </body>
     </html>
   );
