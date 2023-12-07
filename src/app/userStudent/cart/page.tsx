@@ -144,7 +144,7 @@ export default function Cart() {
               variant="contained"
               style={selectedStyle}
               onClick={() => {
-                router.push(`/pay/${order?.id}`);
+                router.push(`/userStudent/pay/${order?.id}`);
               }}
             >
               Proceed to Payment Gateway
@@ -167,7 +167,7 @@ export default function Cart() {
   const user = useSession();
 
   const handleFinish = () => {
-    router.push(`/orders/${order?.id}`);
+    router.push(`/userStudent/orders/${order?.id}`);
   };
   const [activeStep, setActiveStep] = React.useState(0);
   // const [skipped, setSkipped] = React.useState(new Set<number>());

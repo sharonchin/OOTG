@@ -69,7 +69,7 @@ export default function OrderPage() {
                 <TableCell align="center">
                   <IconButton
                     onClick={() => {
-                      router.push(`/orders/${row.id}`);
+                      router.push(`/userStudent/orders/${row.id}`);
                     }}
                   >
                     <VisibilityOutlinedIcon />

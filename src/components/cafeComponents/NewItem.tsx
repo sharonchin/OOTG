@@ -16,6 +16,7 @@ import error from "next/error";
 import toast from "react-hot-toast";
 import PRODUCT_CATEGORY from "@/constants/PRODUCT_CATEGORY";
 import Loading from "../shared/Loading";
+import Link from "next/link";
 
 const selectedStyle = {
   backgroundColor: "#778CCC",
@@ -115,7 +116,7 @@ const NewItem = () => {
         const img = await apiCreateProduct(JSON.stringify(values));
         if (img) {
           toast.success("Image uploaded");
-          return router.push("/management/item");
+          return router.push("/userCafe/management/item");
         }
       } catch (error: any) {
         if (error instanceof Error) {
@@ -210,10 +211,14 @@ const NewItem = () => {
             >
               Save
             </Button>
+
             <Button
               variant="contained"
               style={selectedStyle}
               className=" bg-[#778ccc] text-white"
+              onClick={() => {
+                router.push("/userCafe/management/item");
+              }}
             >
               Cancel
             </Button>

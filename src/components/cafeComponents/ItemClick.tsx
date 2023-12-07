@@ -13,10 +13,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import React from "react";
-import CustomizedSwitches from "./Switch";
-import Image from "next/image";
-import currychicken from "../../public/assets/currychicken.jpg";
-
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LoopOutlinedIcon from "@mui/icons-material/LoopOutlined";
@@ -183,7 +179,9 @@ export default function ItemManagement() {
                     <Tooltip title="Edit">
                       <IconButton
                         onClick={() => {
-                          router.push(`/management/item/editItem/${row.id}`);
+                          router.push(
+                            `/userCafe/management/item/editItem/${row.id}`
+                          );
                         }}
                       >
                         <EditOutlinedIcon />
@@ -216,7 +214,7 @@ export default function ItemManagement() {
       </div>
 
       <div className="flex space-x-4 justify-end">
-        <Link href={`/management/item/newItem`}>
+        <Link href={`/userCafe/management/item/newItem`}>
           <Button
             variant="contained"
             style={selectedStyle}
@@ -225,13 +223,13 @@ export default function ItemManagement() {
             Add Item
           </Button>
         </Link>
-        <Button
+        {/* <Button
           variant="contained"
           style={selectedStyle}
           className=" bg-[#778ccc] text-white"
         >
           Save
-        </Button>
+        </Button> */}
       </div>
     </div>
   );

@@ -59,7 +59,7 @@ const CafeDetails = async ({ params }: { params: { id: string } }) => {
       <div className="flex flex-row gap-5">
         {/* SINGLE ITEM */}
         {products.map((Product) => (
-          <Link href={`/product/${Product.id}`} key={Product.id}>
+          <Link href={`/userStudent/product/${Product.id}`} key={Product.id}>
             <ProductCard product={Product} />
           </Link>
         ))}

@@ -26,7 +26,7 @@ const Products = () => {
       <div className="flex flex-row gap-5 justify-around">
         {/* SINGLE ITEM */}
         {products.map((Product) => (
-          <Link href={`/product/${Product.id}`} key={Product.id}>
+          <Link href={`/userStudent/product/${Product.id}`} key={Product.id}>
             <ProductCard product={Product} />
           </Link>
         ))}
