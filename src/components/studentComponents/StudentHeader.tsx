@@ -49,19 +49,19 @@ export default function Header() {
     <div className="fixed w-full h-20 z-[100] bg-[#778CCC]">
       <div className="flex justify-between items-center w-full h-full px-20">
         <div>
-          <Link href="/">
+          <Link href="/userStudent">
             <Image src={ootg} alt="ootg logo" />
           </Link>
         </div>
 
         <div className="flex">
-          <Link href={`/orders`}>
+          <Link href={`/userStudent/orders`}>
             <IconButton color="secondary">
               <GradingIcon className=" text-white" />
             </IconButton>
           </Link>
 
-          <Link href={`/cart`}>
+          <Link href={`/userStudent/cart`}>
             <IconButton color="secondary" aria-label="add to shopping cart">
               <Badge
                 badgeContent={totalItems}
@@ -91,10 +91,10 @@ export default function Header() {
           "aria-labelledby": "basic-button",
         }}
       >
-        <Link href={`/profile`}>
+        <Link href={`/userStudent/profile`}>
           <MenuItem onClick={handleClose}>Profile</MenuItem>
         </Link>
-        <Link href={`/profile/foodiepassport`}>
+        <Link href={`/userStudent/profile/foodiepassport`}>
           <MenuItem onClick={handleClose}>Foodie Passport</MenuItem>
         </Link>
 

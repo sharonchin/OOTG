@@ -312,7 +312,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 fullWidth
               />
             </div>
-            <Link href={`/`}>
+            <Link href={`/userStudent`}>
               <div className="flex justify-center pt-5">
                 <Button variant="contained" style={selectedStyle}>
                   Submit

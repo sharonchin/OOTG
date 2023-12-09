@@ -23,7 +23,6 @@ const NewPromo = () => {
     <div className="flex flex-col justify-center items-center w-3/4 gap-5">
       <div className=" flex flex-row justify-around items-center bg-[#C2D7F3] p-10 w-full ">
         <FormControl>
-          {/* <FormLabel id="demo-controlled-radio-buttons-group">Gender</FormLabel> */}
           <RadioGroup
             aria-labelledby="demo-controlled-radio-buttons-group"
             name="controlled-radio-buttons-group"
@@ -48,6 +47,7 @@ const NewPromo = () => {
 
       <div className="flex flex-col justify-center w-1/2 gap-3">
         <Button
+          type="submit"
           variant="contained"
           style={selectedStyle}
           className=" bg-[#778ccc] text-white"

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ButtonGroup, Button } from "@mui/material";
 import { useState, useEffect } from "react";
 import React from "react";
-import { Cafe } from "@/types/Cafe.type";
+import { FilteredCafe } from "@/types/Cafe.type";
 import { Product } from "@/types/Product.type";
 import CafeCard from "./CafeCard";
 import { apiGetAllCafe } from "@/lib/api-requests";
@@ -14,7 +14,7 @@ import { useCartStore } from "@/cart";
 import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
 
 const Cafes = () => {
-  const [cafes, setCafes] = React.useState<Cafe[]>([] as Cafe[]);
+  const [cafes, setCafes] = React.useState<FilteredCafe[]>([] as FilteredCafe[]);
   const store = useStore();
   const { selectDeliveryOption } = useCartStore();
 
@@ -106,7 +106,7 @@ const Cafes = () => {
       <div className="flex flex-row gap-5 justify-around">
         {/* SINGLE ITEM */}
         {cafes.map((Cafe) => (
-          <Link href={`/cafe/${Cafe.id}`} key={Cafe.id}>
+          <Link href={`/userStudent/cafe/${Cafe.id}`} key={Cafe.id}>
             <CafeCard cafe={Cafe} />
           </Link>
         ))}
@@ -117,7 +117,7 @@ const Cafes = () => {
           variant="outlined"
           size="small"
           onClick={() => {
-            router.push("/cafe");
+            router.push("/userStudent/cafe");
           }}
         >
           Load More

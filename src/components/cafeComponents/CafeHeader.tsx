@@ -8,7 +8,7 @@ export default function Header() {
   return (
     <div className="fixed w-full h-20 z-[100] bg-[#778CCC]">
       <div className="flex pl-5 w-full h-full">
-        <Link href="/">
+        <Link href="/userCafe">
           <Image src={OOTG} alt="ootg logo" />
         </Link>
       </div>

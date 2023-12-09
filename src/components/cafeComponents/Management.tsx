@@ -23,7 +23,7 @@ export default function Management() {
     <div>
       <div>
         <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <Link href={`/management/item`}>
+          <Link href={`/userCafe/management/item`}>
             <Button
               onClick={() => handleButtonClick("Item")}
               variant={selectedButton === "Item" ? "contained" : "outlined"}
@@ -34,7 +34,7 @@ export default function Management() {
               Item
             </Button>
           </Link>
-          <Link href={`/management/promo`}>
+          <Link href={`/userCafe/management/promo`}>
             <Button
               onClick={() => handleButtonClick("Promo")}
               variant={selectedButton === "Promo" ? "contained" : "outlined"}

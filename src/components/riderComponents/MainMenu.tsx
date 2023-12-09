@@ -23,7 +23,7 @@ export default function MainMenu() {
       <div className="h-3/4 w-full flex justify-center flex-col pt-20 col-md-4 space-y-4">
         {/*Top*/}
         <ButtonGroup variant="outlined" aria-label="outlined button group">
-          <Link href={`/`}>
+          <Link href={`/userRider`}>
             <Button
               onClick={() => handleButtonClick("Dashboard")}
               variant={
@@ -39,7 +39,7 @@ export default function MainMenu() {
             </Button>
           </Link>
 
-          <Link href={`/order`}>
+          <Link href={`/userRider/order`}>
             <Button
               onClick={() => handleButtonClick("Order")}
               variant={selectedButton === "Order" ? "contained" : "outlined"}
@@ -51,7 +51,7 @@ export default function MainMenu() {
             </Button>
           </Link>
 
-          <Link href={`/profile`}>
+          <Link href={`/userRider/profile`}>
             <Button
               onClick={() => handleButtonClick("Profile")}
               variant={selectedButton === "Profile" ? "contained" : "outlined"}
@@ -63,7 +63,7 @@ export default function MainMenu() {
             </Button>
           </Link>
 
-          <Link href={`/setting`}>
+          <Link href={`/userRider/setting`}>
             <Button
               onClick={() => handleButtonClick("Setting")}
               variant={selectedButton === "Setting" ? "contained" : "outlined"}

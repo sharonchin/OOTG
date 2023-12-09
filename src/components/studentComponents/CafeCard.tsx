@@ -4,15 +4,15 @@ import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
-import { Cafe } from "@/types/Cafe.type";
+import { FilteredCafe } from "@/types/Cafe.type";
 
 interface CafeCardProps {
-  cafe: Cafe;
+  cafe: FilteredCafe;
 }
 
 const CafeCard = ({ cafe }: CafeCardProps) => {
   return (
-    <Card sx={{ minWidth: 345, maxWidth: 345, minHeight: 300}}>
+    <Card sx={{ minWidth: 345, maxWidth: 345, minHeight: 300 }}>
       <CardActionArea>
         <CardMedia
           component="img"

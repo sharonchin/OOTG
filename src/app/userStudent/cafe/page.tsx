@@ -25,7 +25,7 @@ const CafeList = async () => {
 
       <div className="flex pb-20 justify-around ">
         {cafe.map((Cafe) => (
-          <Link href={`/cafe/${Cafe.id}`} key={Cafe.id}>
+          <Link href={`/userStudent/cafe/${Cafe.id}`} key={Cafe.id}>
             <CafeCard cafe={Cafe} />
             {/* <div key={Cafe.id} className=" h-60 w-80 justify-start ">
               <img
