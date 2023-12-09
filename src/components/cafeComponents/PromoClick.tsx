@@ -108,7 +108,7 @@ export default function PromoManagement() {
       </div>
 
       <div className="flex space-x-4 justify-end">
-        <Link href={`/management/promo/newPromo`}>
+        <Link href={`/userCafe/management/promo/newPromo`}>
           <Button
             variant="contained"
             style={selectedStyle}
@@ -117,13 +117,6 @@ export default function PromoManagement() {
             Add Promo
           </Button>
         </Link>
-        <Button
-          variant="contained"
-          style={selectedStyle}
-          className=" bg-[#778ccc] text-white"
-        >
-          Save
-        </Button>
       </div>
     </div>
   );

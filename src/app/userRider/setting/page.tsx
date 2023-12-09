@@ -1,6 +1,8 @@
+"use client";
+
 import { apiLogoutRider } from "@/lib/api-requests";
 import { Button } from "@mui/material";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import useStore from "@/store";
 import Loading from "@/components/shared/Loading";
 
