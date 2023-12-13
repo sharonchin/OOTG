@@ -1,5 +1,5 @@
 import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
-import { Cafe } from "./Cafe.type";
+import { FilteredCafe } from "./Cafe.type";
 
 export type Product = {
   id: string;
@@ -11,7 +11,7 @@ export type Product = {
   price: number;
   availability: boolean;
   cafeId: string;
-  cafe: Cafe;
+  cafe: FilteredCafe;
 };
 
 export interface ProductResponse {
@@ -29,7 +29,7 @@ export interface CartItemType {
   quantity: number;
   noteToCafe: string;
   cafeId: string;
-  cafe: Cafe;
+  cafe: FilteredCafe;
 }
 
 export interface CartType {

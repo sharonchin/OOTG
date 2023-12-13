@@ -7,17 +7,7 @@ import prisma from "@/utils/connect";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "http://localhost:3001",
-  "Access-Control-Allow-Methods": "GET,OPTIONS,DELETE,POST,PUT",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version",
-  "Access-Control-Allow-Credentials": "true",
-};
 
-export async function OPTIONS(req: NextRequest) {
-  return NextResponse.json({}, { headers: corsHeaders });
-}
 
 export async function PUT(
   req: NextRequest,
