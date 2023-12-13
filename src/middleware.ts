@@ -22,13 +22,13 @@ export async function middleware(req: NextRequest) {
     return;
 
   if (
-    (!token &&
-      (req.nextUrl.pathname.startsWith("/api/students") ||
-        req.nextUrl.pathname.startsWith("/api/auth/student/logout") ||
-        req.nextUrl.pathname.startsWith("/api/cafes") ||
-        req.nextUrl.pathname.startsWith("/api/auth/cafe/logout"))) ||
-    req.nextUrl.pathname.startsWith("/api/riders") ||
-    req.nextUrl.pathname.startsWith("/api/auth/rider/logout")
+    !token &&
+    (req.nextUrl.pathname.startsWith("/api/students") ||
+      req.nextUrl.pathname.startsWith("/api/auth/student/logout") ||
+      req.nextUrl.pathname.startsWith("/api/cafes") ||
+      req.nextUrl.pathname.startsWith("/api/auth/cafe/logout") ||
+      req.nextUrl.pathname.startsWith("/api/riders") ||
+      req.nextUrl.pathname.startsWith("/api/auth/rider/logout"))
   ) {
     return getErrorResponse(
       401,

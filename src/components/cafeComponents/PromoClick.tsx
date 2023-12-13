@@ -24,26 +24,21 @@ import Availability from "./Availability";
 import Link from "next/link";
 import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 import PromoStatus from "./PromoStatus";
+import { Promo } from "@/types/Promo.type";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import useSession from "@/lib/useSession";
 
 const selectedStyle = {
   backgroundColor: "#778CCC",
 };
 
-function createData(
-  id: string,
-  discountPercentage: number,
-  cappedAmount: number,
-  status: boolean
-) {
-  return { id, discountPercentage, cappedAmount, status };
-}
-
-const rows = [createData("1", 20, 2, true), createData("2", 10, 2, false)];
-
 export default function PromoManagement() {
   const [open, setOpen] = React.useState(false);
   const [check, setCheck] = React.useState(true);
+  const [promos, setPromos] = React.useState<Promo[]>([] as Promo[]);
   const handleOpen = () => setOpen(true);
+  const router = useRouter();
   const handleCheck = (
     event: React.SyntheticEvent<Element, Event>,
     checked: boolean
@@ -53,6 +48,88 @@ export default function PromoManagement() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const user = useSession();
+
+  const getData = async () => {
+    const res = await fetch(
+      `http://localhost:3000/api/promo?cafe=${user?.cafe?.id}`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed up");
+    }
+    setPromos(await res.json());
+  };
+
+  React.useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const changeStatus = async (promo: Promo) => {
+    if (promo.status) {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/promo/changeNotApplied/${promo.id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (res) {
+          toast.success("Promo is not applied now.");
+          return getData(); //will refresh and get updated data
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/promo/changeApplied/${promo.id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (res) {
+          toast.success("Promo is applied now.");
+          return getData(); //will refresh and get updated data
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const deletePromo = async (promo: Promo) => {
+    try {
+      const res = await fetch(`http://localhost:3000/api/promo/${promo.id}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res) {
+        toast.success("Item deleted.");
+        return getData(); //will refresh and get updated data
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="flex flex-col justify-center gap-5">
       <div className="justify-center items-center ">
@@ -60,42 +137,57 @@ export default function PromoManagement() {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell align="center">Promo ID</TableCell>
+                <TableCell align="center">Promo Type</TableCell>
                 <TableCell align="center">Discount Percentage</TableCell>
+                <TableCell align="center">Min Spend</TableCell>
                 <TableCell align="center">Capped Amount</TableCell>
+
                 <TableCell align="center">Status</TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {rows.map((row) => (
+              {promos.map((row) => (
                 <TableRow
                   key={row.id}
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell align="center" component="th" scope="row">
-                    {row.id}
+                    {row.type}
                   </TableCell>
-                  <TableCell align="center">
-                    {row.discountPercentage}%
-                  </TableCell>
-                  <TableCell align="center">{row.cappedAmount}</TableCell>
+                  <TableCell align="center">{row.discount}%</TableCell>
+                  <TableCell align="center">RM{row.min_spend_amount}</TableCell>
+                  <TableCell align="center">RM{row.capped_amount}</TableCell>
                   <TableCell align="center">
                     <PromoStatus status={row.status} />
                   </TableCell>
                   <TableCell align="center">
                     <Tooltip title="Edit">
-                      <IconButton>
+                      <IconButton
+                        onClick={() => {
+                          router.push(
+                            `/userCafe/management/promo/editPromo/${row.id}`
+                          );
+                        }}
+                      >
                         <EditOutlinedIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Apply">
-                      <IconButton>
+                      <IconButton
+                        onClick={() => {
+                          changeStatus(row);
+                        }}
+                      >
                         <DoneOutlinedIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
-                      <IconButton>
+                      <IconButton
+                        onClick={() => {
+                          deletePromo(row);
+                        }}
+                      >
                         <DeleteOutlineOutlinedIcon />
                       </IconButton>
                     </Tooltip>

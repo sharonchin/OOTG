@@ -15,6 +15,7 @@ import {
   RiderResponse,
   RiderLoginResponse,
 } from "@/types/Rider.type";
+import { Promo, PromoResponse } from "@/types/Promo.type";
 
 const SERVER_ENDPOINT = process.env.SERVER_ENDPOINT || "http://localhost:3000";
 
@@ -263,5 +264,38 @@ export async function apiUpdateProduct(
 
   return handleResponse<ProductResponse>(response).then(
     (data) => data.data.product
+  );
+}
+
+export async function apiCreatePromo(credentials: string): Promise<Promo> {
+  const response = await fetch(`${SERVER_ENDPOINT}/api/promo`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: credentials,
+  });
+
+  return handleResponse<PromoResponse>(response).then(
+    (data) => data.data.promo
+  );
+}
+
+export async function apiUpdatePromo(
+  credentials: string,
+  promoId: string
+): Promise<Promo> {
+  const response = await fetch(`${SERVER_ENDPOINT}/api/promo/${promoId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: credentials,
+  });
+
+  return handleResponse<PromoResponse>(response).then(
+    (data) => data.data.promo
   );
 }

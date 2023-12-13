@@ -1,8 +1,8 @@
 import { getErrorResponse } from "@/lib/helpers";
 import {
-  UpdateProductInput,
-  ProductUpdateSchema,
-} from "@/lib/validations/product.schema";
+  UpdatePromoInput,
+  PromoUpdateSchema,
+} from "@/lib/validations/promo.schema";
 import prisma from "@/utils/connect";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
@@ -12,21 +12,21 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const productId = params.id;
+    const promoId = params.id;
 
-    const product = await prisma.product.update({
+    const promo = await prisma.promo.update({
       where: {
-        id: productId,
+        id: promoId,
       },
       data: {
-        availability: false,
+        status: true,
       },
     });
 
     return new NextResponse(
       JSON.stringify({
         status: "success",
-        data: { product: { ...product } },
+        data: { promo: { ...promo } },
       }),
       {
         status: 201,
