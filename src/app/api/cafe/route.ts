@@ -1,15 +1,16 @@
 import prisma from "@/utils/connect";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 // const api_key = "443248966918758"
 // const cloud_name = "devlognxn"
 
 //Fetch all cafe
-export const GET = async () => {
+export const GET = async (req: NextRequest) => {
   try {
     const cafe = await prisma.cafe.findMany({
       include: {
         loc: true,
+        Rating: true,
       },
     });
     return new NextResponse(JSON.stringify(cafe), { status: 200 });

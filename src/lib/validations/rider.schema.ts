@@ -16,7 +16,7 @@ export const RegisterRiderSchema = z
         required_error: "Last name is required",
       })
       .min(1, "Last name is required"),
-      
+
     email: z
       .string({
         required_error: "Email is required",
@@ -73,5 +73,35 @@ export const LoginRiderSchema = z.object({
     .min(8, "Password must be more than 8 characters"),
 });
 
+export const UpdateRiderSchema = z.object({
+  firstName: z
+    .string({
+      required_error: "First name is required",
+    })
+    .min(1, "First name is required"),
+
+  lastName: z
+    .string({
+      required_error: "Last name is required",
+    })
+    .min(1, "Last name is required"),
+
+  phoneNo: z
+    .string({
+      required_error: "Phone number is required",
+    })
+    .min(1, "Phone number is required")
+    .regex(phoneRegex, "Phone number is invalid"),
+
+  deliveryMode: z.nativeEnum(DELIVERY_MODE),
+
+  vehicleNo: z
+    .string({
+      required_error: "Vehicle number is required",
+    })
+    .min(1, "Vehicle number is required"),
+});
+
 export type LoginRiderInput = z.infer<typeof LoginRiderSchema>;
 export type RegisterRiderInput = z.infer<typeof RegisterRiderSchema>;
+export type UpdateRiderInput = z.infer<typeof UpdateRiderSchema>;

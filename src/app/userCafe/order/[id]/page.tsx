@@ -17,6 +17,8 @@ import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfi
 import Link from "next/link";
 import { Order } from "@/types/Order.type";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
+import { useRouter } from "next/navigation";
 
 const style = {
   position: "absolute" as "absolute",
@@ -42,6 +44,15 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
   };
   const [order, setOrder] = React.useState<Order>({} as Order);
 
+  const [socket, setSocket] = React.useState<any>(undefined);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    const socket = io("http://localhost:3001");
+
+    setSocket(socket);
+  }, []);
+
   const getData = async () => {
     const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
       cache: "no-store",
@@ -66,7 +77,8 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
     }
 
     toast.success("Status Updated Successfully");
-    return getData();
+    socket.emit("pickup", true);
+    return router.push("/userCafe/order");
   };
 
   React.useEffect(() => {
@@ -93,7 +105,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
       <Paper elevation={1}>
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-bold text-2xl">There's an order for you!</h1>
-          <h1>#0001</h1>
+          <h1 className="text-xl font-bold">#{order?.id?.slice(-5)}</h1>
           <h1 className="underline underline-offset-4">Order Details</h1>
           <Box
             sx={{ display: "flex", justifyContent: "center", width: "100%" }}
@@ -125,14 +137,28 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   >
                     <h1>{row.amount}</h1>
                   </Grid>
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "start",
+                      alignItems: "center",
+                      pl: 10,
+                    }}
+                    xs={12}
+                  >
+                    <h1>{row.noteToCafe}</h1>
+                  </Grid>
                 </>
               ))}
+
               <Grid
                 item
                 sx={{
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+                  pt: 6,
                 }}
                 xs={6}
               >
@@ -144,6 +170,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+                  pt: 6,
                 }}
                 xs={6}
               >
@@ -227,34 +254,25 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
               >
                 <h1>Pick Up at: {order?.cafe?.name}</h1>
               </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Note from Student: -</h1>
-              </Grid>
+
               <div></div>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  pr: 10,
-                }}
-                xs={12}
-              >
-                <CustomizedSwitches
-                  label="Ready for pick up"
-                  handleOpen={updateToPickUp}
-                />
-              </Grid>
+              {order.status === "PREPARING" ? (
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    justifyContent: "end",
+                    alignItems: "center",
+                    pr: 10,
+                  }}
+                  xs={12}
+                >
+                  <CustomizedSwitches
+                    label="Ready for pick up"
+                    handleOpen={updateToPickUp}
+                  />
+                </Grid>
+              ) : null}
               <Grid
                 item
                 sx={{
@@ -262,6 +280,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   justifyContent: "start",
                   alignItems: "center",
                   pl: 10,
+                  pt: 3,
                 }}
                 xs={12}
               >

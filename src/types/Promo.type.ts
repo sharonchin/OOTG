@@ -6,6 +6,7 @@ export type Promo = {
   id: string;
   createdAt: string;
   type: PROMO_TYPE;
+  name: string;
   discount: number;
   min_spend_amount: number;
   capped_amount: number;

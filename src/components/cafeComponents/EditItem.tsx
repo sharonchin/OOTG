@@ -46,21 +46,6 @@ const EditItem = ({ product }: EditItemProps) => {
     },
   });
 
-  //   const getData = async () => {
-  //     const res = await fetch(`http://localhost:3000/api/product/${productId}`, {
-  //       cache: "no-store",
-  //     });
-  //     if (!res.ok) {
-  //       console.log(res);
-  //       throw new Error("Screwed up");
-  //     }
-  //     setProduct(await res.json());
-  //     // setValue("name", product?.name);
-  //     // setValue("price", product?.price);
-  //     // setValue("desc", product?.desc);
-  //     // setValue("productCategory", product?.productCategory as PRODUCT_CATEGORY);
-  //   };
-
   React.useEffect(() => {
     setValue("name", product?.name);
     setValue("price", product?.price);
@@ -137,7 +122,7 @@ const EditItem = ({ product }: EditItemProps) => {
           );
           if (img) {
             toast.success("Product updated!");
-            return router.push("/management/item");
+            return router.push("/userCafe/management/item");
           }
         } catch (error: any) {
           if (error instanceof Error) {
@@ -180,7 +165,7 @@ const EditItem = ({ product }: EditItemProps) => {
           );
           if (img) {
             toast.success("Image uploaded");
-            return router.push("/management/item");
+            return router.push("/userCafe/management/item");
           }
         } catch (error: any) {
           if (error instanceof Error) {
@@ -281,7 +266,7 @@ const EditItem = ({ product }: EditItemProps) => {
               style={selectedStyle}
               className=" bg-[#778ccc] text-white"
               onClick={() => {
-                router.push("/management/item");
+                router.push("/userCafe/management/item");
               }}
             >
               Cancel

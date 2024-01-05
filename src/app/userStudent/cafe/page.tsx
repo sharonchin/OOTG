@@ -21,7 +21,7 @@ const CafeList = async () => {
   return (
     <div className="flex flex-col p-10">
       {/* <Search/> */}
-      <span className="font-bold text-2xl pt-20">All Cafes</span>
+      <span className="font-bold text-3xl py-20">All Cafes</span>
 
       <div className="flex pb-20 justify-around ">
         {cafe.map((Cafe) => (

@@ -7,6 +7,7 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TablePagination from "@mui/material/TablePagination";
 import Paper from "@mui/material/Paper";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
@@ -20,6 +21,7 @@ export default function OrderPage() {
   const user = useSession();
   const [orders, setOrders] = React.useState<Order[]>([] as Order[]);
   const router = useRouter();
+  const [page, setPage] = React.useState(0);
 
   const getOrder = async () => {
     const res = await fetch(
@@ -39,13 +41,32 @@ export default function OrderPage() {
     getOrder();
   }, []);
 
+  function compare(a: any, b: any) {
+    if (a.createdAt > b.createdAt) {
+      return -1;
+    }
+    if (a.createdAt < b.createdAt) {
+      return 1;
+    }
+    return 0;
+  }
+
+  const visibleRows = React.useMemo(
+    () => orders?.sort(compare).slice(page * 8, page * 8 + 8),
+    [getOrder, page]
+  );
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
     <div className="px-5 w-full h-3/4 justify-center items-center pt-10">
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              {/* <TableCell align="center">Order ID</TableCell> */}
+              <TableCell align="center">Order ID</TableCell>
               <TableCell align="center">Order Created</TableCell>
               <TableCell align="center">Order Type</TableCell>
               <TableCell align="center">Location</TableCell>
@@ -54,12 +75,12 @@ export default function OrderPage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((row) => (
+            {visibleRows.map((row) => (
               <TableRow
                 key={row.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                {/* <TableCell align="center">{row.id.}</TableCell> */}
+                <TableCell align="center">#{row.id.slice(-5)}</TableCell>
                 <TableCell align="center">
                   {moment(row.createdAt).format("DD/MM/YYYY hh:mma")}
                 </TableCell>
@@ -82,6 +103,12 @@ export default function OrderPage() {
             ))}
           </TableBody>
         </Table>
+        <TablePagination
+          count={orders.length}
+          rowsPerPage={8}
+          page={page}
+          onPageChange={handleChangePage}
+        />
       </TableContainer>
     </div>
   );

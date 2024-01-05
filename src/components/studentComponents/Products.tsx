@@ -23,10 +23,17 @@ const Products = () => {
     <div className="flex flex-col">
       <span className="text-3xl font-bold py-10">All food</span>
 
-      <div className="flex flex-row gap-5 justify-around">
+      <div className="flex flex-row gap-5 justify-around overflow-x-scroll">
         {/* SINGLE ITEM */}
         {products.map((Product) => (
-          <Link href={`/userStudent/product/${Product.id}`} key={Product.id}>
+          <Link
+            href={
+              Product.availability === false || Product.cafe.status === false
+                ? ``
+                : `/userStudent/product/${Product.id}`
+            }
+            key={Product.id}
+          >
             <ProductCard product={Product} />
           </Link>
         ))}

@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 const INITIAL_STATE = {
   products: [],
   totalItems: 0,
-  totalPrice: 0,
+  totalPrice: 0 as number,
   deliveryOption: "DELIVERY" as DELIVERY_OPTION,
 };
 

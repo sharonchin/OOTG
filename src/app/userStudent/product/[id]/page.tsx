@@ -12,13 +12,15 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Product } from "@/types/Product.type";
 import { useCartStore } from "@/cart";
 import toast from "react-hot-toast";
+import ProductCard from "@/components/studentComponents/ProductCard";
 
 const SingleProductPage = ({ params }: { params: { id: string } }) => {
   const [product, setProduct] = useState<Product>({} as Product);
   const [total, setTotal] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [note, setNote] = useState<string>("-");
-  const { addToCart } = useCartStore();
+  const { addToCart, products } = useCartStore();
+  const [cafeProduct, setCafeProduct] = useState<Product[]>([] as Product[]);
 
   useEffect(() => {
     useCartStore.persist.rehydrate();
@@ -28,36 +30,64 @@ const SingleProductPage = ({ params }: { params: { id: string } }) => {
     setTotal(quantity * product?.price);
   }, [product, quantity]);
   const handleCart = () => {
-    addToCart({
-      id: product.id,
-      name: product.name,
-      img: product.img,
-      price: product.price,
-      amount: total,
-      quantity: quantity,
-      noteToCafe: note,
-      cafeId: product.cafeId,
-      cafe: product.cafe,
-    });
-    toast.success("The item is added to cart!");
+    if (products.length < 1) {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        img: product.img,
+        price: product.price,
+        amount: total,
+        quantity: quantity,
+        noteToCafe: note,
+        cafeId: product.cafeId,
+        cafe: product.cafe,
+      });
+      toast.success("The item is added to cart!");
+    } else if (product?.cafeId === products[0].cafeId) {
+      addToCart({
+        id: product.id,
+        name: product.name,
+        img: product.img,
+        price: product.price,
+        amount: total,
+        quantity: quantity,
+        noteToCafe: note,
+        cafeId: product.cafeId,
+        cafe: product.cafe,
+      });
+      toast.success("The item is added to cart!");
+    } else {
+      toast.error("Please choose the item from the same cafe!");
+    }
   };
 
   const getData = async () => {
-    const res = await fetch(`http://localhost:3000/api/product/${params.id}`, {
+    const res1 = await fetch(`http://localhost:3000/api/product/${params.id}`, {
       cache: "no-store",
     });
-    if (!res.ok) {
-      console.log(res);
+
+    if (!res1.ok) {
       throw new Error("Screwed up");
     }
-    setProduct(await res.json());
+    setProduct(await res1.json());
     setTotal(product?.price);
+
+    const res2 = await fetch(
+      `http://localhost:3000/api/product?cafe=${product?.cafeId}`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!res2.ok) {
+      throw new Error("Screwed up");
+    }
+    setCafeProduct(await res2.json());
   };
 
   useEffect(() => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [product]);
   return (
     <div className="flex flex-col justify-center">
       {/* <div className="flex flex-row justify-center items-center">
@@ -126,6 +156,16 @@ const SingleProductPage = ({ params }: { params: { id: string } }) => {
               Add To Cart
             </Button>
           </div>
+        </div>
+      </div>
+      <div>
+        <span className="text-3xl font-bold">From the same cafe</span>
+        <div className="flex flex-row gap-5 pt-10">
+          {cafeProduct.map((Product) => (
+            <Link href={`/userStudent/product/${Product.id}`} key={Product.id}>
+              <ProductCard product={Product} />
+            </Link>
+          ))}
         </div>
       </div>
     </div>

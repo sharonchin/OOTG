@@ -85,8 +85,8 @@ export default function SignUp() {
               onSubmit={handleSubmit(onSubmitHandler)}
               className="max-w-md w-full mx-auto overflow-hidden bg-ct-dark-200 rounded-2xl p-8 space-y-5"
             >
-              <FormInput label="First Name" name="lastName" />
-              <FormInput label="Last Name" name="firstName" />
+              <FormInput label="First Name" name="firstName" />
+              <FormInput label="Last Name" name="lastName" />
               <FormInput label="Email" name="email" type="email" />
               <FormInput label="Password" name="password" type="password" />
               <FormInput

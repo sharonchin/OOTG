@@ -14,7 +14,10 @@ import { useCartStore } from "@/cart";
 import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
 
 const Cafes = () => {
-  const [cafes, setCafes] = React.useState<FilteredCafe[]>([] as FilteredCafe[]);
+  const [cafes, setCafes] = React.useState<FilteredCafe[]>(
+    [] as FilteredCafe[]
+  );
+  const [activeRider, setActiveRider] = React.useState<number>(0);
   const store = useStore();
   const { selectDeliveryOption } = useCartStore();
 
@@ -24,9 +27,13 @@ const Cafes = () => {
 
   const getCafe = async () => {
     store.setRequestLoading(true);
-    const res = await apiGetAllCafe();
+    const cafeRes = await apiGetAllCafe();
+    const riderRes = await fetch(
+      `http://localhost:3000/api/rider/getActiveRiderCount`
+    );
 
-    setCafes(res);
+    setCafes(cafeRes);
+    setActiveRider(await riderRes.json());
     store.setRequestLoading(false);
   };
 
@@ -34,22 +41,6 @@ const Cafes = () => {
     getCafe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // const getProduct = async () => {
-  //   const res = await fetch(
-  //     `http://localhost:3000/api/product?cafe=`,
-  //     {
-  //       cache: "no-store",
-  //     }
-  //   );
-  //   if (!res.ok) {
-  //     console.log(res);
-  //     throw new Error("Screwed up");
-  //   }
-  //   return res.json();
-  // };
-
-  // const products: Product[] = await getProduct();
 
   const [selectedButton, setSelectedButton] = React.useState<DELIVERY_OPTION>(
     "DELIVERY" as DELIVERY_OPTION
@@ -68,11 +59,34 @@ const Cafes = () => {
     selectDeliveryOption(button);
   };
   const router = useRouter();
+
+  function calculateRating(x: any) {
+    let totalRating = 0;
+    if (x.Rating.length > 0) {
+      x.Rating.forEach((i: any) => {
+        totalRating += i.rating;
+      });
+      return totalRating / x.Rating.length;
+    }
+    return 0;
+  }
+
+  function compare(a: any, b: any) {
+    if (calculateRating(a) > calculateRating(b)) {
+      return -1;
+    }
+    if (calculateRating(a) < calculateRating(b)) {
+      return 1;
+    }
+    return 0;
+  }
+
   return (
     <div className="flex flex-col">
       {store.requestLoading && <Loading />}
-      <div className="h-3/4 w-full flex justify-center flex-col pt-20 col-md-4 space-y-4">
+      <div className="h-3/4 w-full flex justify-between flex-row pt-20 col-md-4 ">
         {/*Top*/}
+
         <ButtonGroup variant="outlined" aria-label="outlined button group">
           <Button
             onClick={() => handleButtonClick("DELIVERY" as DELIVERY_OPTION)}
@@ -93,11 +107,23 @@ const Cafes = () => {
             Pick Up
           </Button>
         </ButtonGroup>
+        <Button
+          disabled
+          variant="contained"
+          style={{
+            backgroundColor: "#778CCC",
+            color: "white",
+            fontSize: "20px",
+          }}
+        >
+          Current available rider: {activeRider}
+        </Button>
+
         {/*Botton*/}
-        <ButtonGroup variant="outlined" aria-label="outlined button group">
+        {/* <ButtonGroup variant="outlined" aria-label="outlined button group">
           <Button>Offer</Button>
           <Button>Free Delivery</Button>
-        </ButtonGroup>
+        </ButtonGroup> */}
       </div>
 
       <span className="text-3xl font-bold py-10">All cafes</span>
@@ -105,11 +131,17 @@ const Cafes = () => {
       {/* WRAPPER */}
       <div className="flex flex-row gap-5 justify-around">
         {/* SINGLE ITEM */}
-        {cafes.map((Cafe) => (
-          <Link href={`/userStudent/cafe/${Cafe.id}`} key={Cafe.id}>
-            <CafeCard cafe={Cafe} />
-          </Link>
-        ))}
+        {cafes
+          .slice(0, 3)
+          .sort(compare)
+          .map((Cafe) => (
+            <Link
+              href={Cafe.status ? `/userStudent/cafe/${Cafe.id}` : ``}
+              key={Cafe.id}
+            >
+              <CafeCard cafe={Cafe} />
+            </Link>
+          ))}
       </div>
 
       <div className="flex justify-center py-8">

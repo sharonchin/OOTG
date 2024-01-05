@@ -10,6 +10,7 @@ export const GET = async (
       const order = await prisma.order.findUnique({
         where: {
           id: orderId,
+          
         },
   
         include: {
@@ -19,6 +20,7 @@ export const GET = async (
               },
             },
             student: true,
+            rider: true
           },
       });
       return new NextResponse(JSON.stringify(order), { status: 200 });

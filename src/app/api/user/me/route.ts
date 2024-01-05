@@ -16,7 +16,11 @@ export async function GET(req: NextRequest) {
     where: { id: userId },
     include: {
       student: true,
-      cafe: true,
+      cafe: {
+        include: {
+          Rating: true
+        }
+      },
       rider: true,
     },
   });

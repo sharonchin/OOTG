@@ -33,6 +33,12 @@ const NewPromo = () => {
   const store = useStore();
   const methods = useForm<CreatePromoInput>({
     resolver: zodResolver(PromoCreationSchema),
+    defaultValues: {
+      name: "-",
+      discount: 0,
+      min_spend_amount: 0,
+      capped_amount: 0,
+    },
   });
   const router = useRouter();
 
@@ -88,36 +94,13 @@ const NewPromo = () => {
 
   return (
     <div className="flex flex-col justify-center items-center w-3/4 gap-5">
-      <div className=" flex flex-row justify-around items-center bg-[#C2D7F3] p-10 w-full ">
-        {/* <FormControl>
-          <RadioGroup
-            aria-labelledby="demo-controlled-radio-buttons-group"
-            name="controlled-radio-buttons-group"
-            value={value}
-            onChange={handleChange}
-          >
-            <FormControlLabel
-              value="Free Delivery Voucher"
-              control={<Radio />}
-              label="Free Delivery Voucher"
-            />
-
-            <FormControlLabel
-              value="Discount Voucher"
-              control={<Radio />}
-              label="Discount Voucher"
-            />
-          </RadioGroup>
-          {value === "Discount Voucher" && <DiscountVoucher />}
-        </FormControl>
-      </div> */}
-
+      <div className=" flex flex-row justify-center items-center bg-[#C2D7F3] p-10 w-full ">
         <FormProvider {...methods}>
           <form
             onSubmit={handleSubmit(onSubmitHandler)}
-            className="max-w-md w-full mx-auto overflow-hidden bg-ct-dark-200 rounded-2xl p-8 space-y-5"
+            className="max-w-md w-full mx-auto overflow-hidden bg-ct-dark-200 rounded-2xl p-8 space-y-5 flex flex-col items-center"
           >
-            <div className="flex flex-row justify-around">
+            <div className="flex flex-row justify-around gap-5">
               <label>
                 <div className="flex">
                   <input
@@ -142,8 +125,9 @@ const NewPromo = () => {
               </label>
             </div>
             {value === "DISCOUNT_VOUCHER" && (
-              <div className="flex flex-row gap-3">
-                <FormInput label="Discount" name="discount" valueAsNumber />
+              <div className="flex flex-row gap-15 item-center justify-center">
+                <FormInput label="Name" name="name" />
+                <FormInput label="Discount (%)" name="discount" valueAsNumber />
                 <FormInput
                   label="Min Spend"
                   name="min_spend_amount"
@@ -156,7 +140,7 @@ const NewPromo = () => {
                 />
               </div>
             )}
-            <div className="flex flex-col justify-center w-1/2 gap-3">
+            <div className="flex flex-col justify-center item-center w-1/2 gap-3">
               <Button
                 type="submit"
                 variant="contained"
@@ -169,6 +153,9 @@ const NewPromo = () => {
                 variant="contained"
                 style={selectedStyle}
                 className=" bg-[#778ccc] text-white"
+                onClick={() => {
+                  router.push("/userCafe/management/promo");
+                }}
               >
                 Cancel
               </Button>

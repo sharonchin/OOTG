@@ -14,24 +14,11 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Link from "next/link";
+import STATUS from "@/constants/STATUS";
+import useSession from "@/lib/useSession";
+import toast from "react-hot-toast";
+import { Order as OrderType } from "@/types/Order.type";
 
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number
-) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-  createData("Cupcake", 305, 3.7, 67, 4.3),
-  createData("Gingerbread", 356, 16.0, 49, 3.9),
-];
 export default function Dashboard() {
   const [online, setOnline] = React.useState(true);
 
@@ -43,17 +30,88 @@ export default function Dashboard() {
     setOnline(!online);
   };
 
+  const user = useSession();
+  const [orders, setOrders] = React.useState<OrderType[]>([] as OrderType[]);
+
+  const getOrder = async () => {
+    const res = await fetch(
+      `http://localhost:3000/api/orders?rider=${user?.rider?.id}`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed up");
+    }
+    setOrders(await res.json());
+  };
+
+  React.useEffect(() => {
+    getOrder();
+  }, []);
+
+  const changeAvailability = async () => {
+    if (user?.rider?.status) {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/rider/changeToOffline/${user?.rider?.id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (res) {
+          toast.success("You are offline now.");
+          return window.location.reload(); //will refresh and get updated data
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        const res = await fetch(
+          `http://localhost:3000/api/rider/changeToOnline/${user?.rider?.id}`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (res) {
+          toast.success("You are online now.");
+          return window.location.reload(); //will refresh and get updated data
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const activeOrder = orders.filter(
+    (order) => order.status !== ("COMPLETED" as STATUS)
+  );
+
+  const completedOrder = orders.filter(
+    (order) => order.status === ("COMPLETED" as STATUS)
+  );
+
   return (
     <div>
       <span className="flex justify-center font-bold text-2xl ">
-        Welcome Back Rider A!
+        Welcome Back {user?.rider?.firstName}!
       </span>
       <div className="flex flew-row justify-between gap-20 pt-10">
         <Card sx={{ minWidth: 275 }}>
           <CardContent>
             <div className="flex flex-col items-center">
               <span className="text-xl font-bold">Completed Order</span>
-              <span>12</span>
+              <span>{completedOrder.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -61,7 +119,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="flex flex-col items-center">
               <span className="text-xl font-bold">Total Earning</span>
-              <span>Rm200</span>
+              <span>RM {completedOrder.length * 2}</span>
             </div>
           </CardContent>
         </Card>
@@ -84,9 +142,11 @@ export default function Dashboard() {
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <div className="flex flex-col justify-center gap-2 items-center">
-              <span>{`You're ${online ? "online" : "offline"}`}</span>
+            <span>{`You're ${
+                user?.rider?.status ? "online" : "offline"
+              }`}</span>
               <Button
-                onClick={handleButtonClick}
+                onClick={changeAvailability}
                 variant="contained"
                 style={selectedStyle}
               >
@@ -111,18 +171,25 @@ export default function Dashboard() {
             elevation={2}
             sx={{ display: "flex", justifyContent: "center" }}
           >
+              {activeOrder.length > 0 ? (
             <div className="flex flex-col justify-center gap-2 items-center">
-              <h1 className="font-bold text-2xl">Active Order</h1>
-              <span>Pick Up : KKE - Elemental Cafe</span>
-              <span>Drop off: Library</span>
-              <span>Note from Student: Meet at lobby</span>
 
-              <Link href={`/order/1`}>
+              <h1 className="font-bold text-2xl">Active Order</h1>
+              <span>{`Pick Up : ${activeOrder[0]?.cafe.loc.location} - ${activeOrder[0]?.cafe.name}`}</span>
+              <span>{`Drop off: ${activeOrder[0]?.deliveryAddress}`}</span>
+              <span>{`Note from Student: ${activeOrder[0]?.noteToRider}`}</span>
+
+              <Link href={`/userRider/order/${activeOrder[0].id}`}>
                 <Button variant="contained" style={selectedStyle}>
                   View Your Order
                 </Button>
               </Link>
             </div>
+              ) : (
+                <div className="flex flex-col justify-center gap-2 items-center">
+                  <h1 className="font-bold text-2xl">No Active Orders</h1>
+                </div>
+              )}
           </Paper>
         </Box>
       </div>

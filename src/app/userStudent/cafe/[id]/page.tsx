@@ -37,18 +37,18 @@ const CafeDetails = async ({ params }: { params: { id: string } }) => {
 
   return (
     <div className="flex flex-col">
-      <div className="flex pb-20 flex-row justify-center items-center mx-8">
+      <div className="flex pt-20 pb-20 flex-row justify-center items-center mx-8">
         {/*ProductWrapper */}
         <div className=" h-100 w-200 ">
           {/* ImageContainer */}
           <img
             src={`https://res.cloudinary.com/devlognxn/image/upload/v1699984254/${cafe.img}.jpg`}
             alt={cafe.name}
-            width={500}
-            height={400}
+            width={400}
+            height={300}
           />
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 pl-10">
           <h1 className="text-4xl font-extrabold">{cafe.name}</h1>
           <h1 className="text-xl">{cafe.loc.location}</h1>
           <h1 className="text-xl">{cafe.operatingHour}</h1>

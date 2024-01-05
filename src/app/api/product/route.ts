@@ -16,6 +16,9 @@ export const GET = async (req: NextRequest) => {
       where: {
         ...(cafe ? { cafeId: cafe as string } : {}),
       },
+      include: {
+        cafe: true,
+      },
     });
 
     return new NextResponse(JSON.stringify(product), { status: 200 });

@@ -137,6 +137,7 @@ export default function PromoManagement() {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell align="center">Promo Name</TableCell>
                 <TableCell align="center">Promo Type</TableCell>
                 <TableCell align="center">Discount Percentage</TableCell>
                 <TableCell align="center">Min Spend</TableCell>
@@ -153,6 +154,9 @@ export default function PromoManagement() {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell align="center" component="th" scope="row">
+                    {row.name}
+                  </TableCell>
+                  <TableCell align="center" component="th" scope="row">
                     {row.type}
                   </TableCell>
                   <TableCell align="center">{row.discount}%</TableCell>
@@ -162,7 +166,7 @@ export default function PromoManagement() {
                     <PromoStatus status={row.status} />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Edit">
+                    {/* <Tooltip title="Edit">
                       <IconButton
                         onClick={() => {
                           router.push(
@@ -172,7 +176,7 @@ export default function PromoManagement() {
                       >
                         <EditOutlinedIcon />
                       </IconButton>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="Apply">
                       <IconButton
                         onClick={() => {

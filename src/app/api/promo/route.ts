@@ -12,12 +12,14 @@ import PROMO_TYPE from "@/constants/PROMO_TYPE";
 export const GET = async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
   const cafe = searchParams.get("cafe");
+  const status = searchParams.get("status");
 
   console.log(cafe);
 
   try {
     const promo = await prisma.promo.findMany({
       where: {
+        ...(status ? { cafeId: cafe as string, status: true } : {}),
         ...(cafe ? { cafeId: cafe as string } : {}),
       },
     });
@@ -41,6 +43,7 @@ export async function POST(req: NextRequest) {
       const promo = await prisma.promo.create({
         data: {
           type: data.type,
+          name: data.name,
           discount: 0,
           min_spend_amount: 0,
           capped_amount: 2,
@@ -62,9 +65,10 @@ export async function POST(req: NextRequest) {
       const promo = await prisma.promo.create({
         data: {
           type: data.type,
-          discount: data.discount,
-          min_spend_amount: data.min_spend_amount,
-          capped_amount: data.capped_amount,
+          name: data.name,
+          discount: data.discount as number,
+          min_spend_amount: data.min_spend_amount as number,
+          capped_amount: data.capped_amount as number,
           cafeId: data.cafeId,
         },
       });
