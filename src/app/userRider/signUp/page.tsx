@@ -70,7 +70,6 @@ export default function SignUp() {
   }
 
   const onSubmitHandler: SubmitHandler<RegisterRiderInput> = (values) => {
-    console.log(values);
     RegisterRiderFunction(values);
   };
 
@@ -85,8 +84,8 @@ export default function SignUp() {
               onSubmit={handleSubmit(onSubmitHandler)}
               className="max-w-md w-full mx-auto overflow-hidden bg-ct-dark-200 rounded-2xl p-8 space-y-5"
             >
-              <FormInput label="First Name" name="lastName" />
-              <FormInput label="Last Name" name="firstName" />
+              <FormInput label="First Name" name="firstName" />
+              <FormInput label="Last Name" name="lastName" />
               <FormInput label="Email" name="email" type="email" />
               <FormInput label="Password" name="password" type="password" />
               <FormInput
@@ -95,37 +94,45 @@ export default function SignUp() {
                 type="password"
               />
               <FormInput label="Phone Number" name="phoneNo" />
-              <div className="flex flex-row justify-around">
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"CAR" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">Car</h1>
-                  </div>
+              <div className="flex flex-col justify-around">
+                <label
+                  htmlFor={"deliveryMode"}
+                  className="block text-ct-blue-600 mb-3"
+                >
+                  Mode of Delivery
                 </label>
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"MOTORCYCLE" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">Motorcycle</h1>
-                  </div>
-                </label>
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"BYFOOT" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">By Foot</h1>
-                  </div>
-                </label>
+                <div className="flex flex-row justify-around">
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"CAR" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">Car</h1>
+                    </div>
+                  </label>
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"MOTORCYCLE" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">Motorcycle</h1>
+                    </div>
+                  </label>
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"BYFOOT" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">By Foot</h1>
+                    </div>
+                  </label>
+                </div>
                 {errors["deliveryMode"] && (
                   <span className="text-red-500 text-xs pt-1 block">
                     {errors["deliveryMode"]?.message as string}

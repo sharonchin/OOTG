@@ -6,6 +6,8 @@ export const PromoCreationSchema = z.object({
     required_error: "Promo type is required!",
   }),
 
+  name: z.string().optional(),
+
   discount: z.number().optional(),
 
   min_spend_amount: z.number().optional(),
@@ -21,6 +23,8 @@ export const PromoUpdateSchema = z.object({
   type: z.nativeEnum(PROMO_TYPE, {
     required_error: "Promo type is required!",
   }),
+
+  name: z.string().optional(),
 
   discount: z.number().optional(),
 

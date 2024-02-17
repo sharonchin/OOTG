@@ -1,8 +1,10 @@
 "use client";
 import {
+  Box,
   Button,
   ButtonGroup,
   IconButton,
+  Modal,
   Paper,
   Table,
   TableBody,
@@ -11,6 +13,7 @@ import {
   TableHead,
   TableRow,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import React from "react";
 import CustomizedSwitches from "./Switch";
@@ -28,9 +31,22 @@ import { Promo } from "@/types/Promo.type";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import useSession from "@/lib/useSession";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 const selectedStyle = {
   backgroundColor: "#778CCC",
+};
+
+const modalBoxStyle = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
 };
 
 export default function PromoManagement() {
@@ -50,8 +66,10 @@ export default function PromoManagement() {
   };
 
   const user = useSession();
+  const store = useStore();
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/promo?cafe=${user?.cafe?.id}`,
       {
@@ -63,6 +81,7 @@ export default function PromoManagement() {
       throw new Error("Screwed up");
     }
     setPromos(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -73,6 +92,7 @@ export default function PromoManagement() {
   const changeStatus = async (promo: Promo) => {
     if (promo.status) {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/promo/changeNotApplied/${promo.id}`,
           {
@@ -85,13 +105,17 @@ export default function PromoManagement() {
         );
         if (res) {
           toast.success("Promo is not applied now.");
+          store.setRequestLoading(false);
           return getData(); //will refresh and get updated data
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     } else {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/promo/changeApplied/${promo.id}`,
           {
@@ -104,16 +128,20 @@ export default function PromoManagement() {
         );
         if (res) {
           toast.success("Promo is applied now.");
+          store.setRequestLoading(false);
           return getData(); //will refresh and get updated data
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     }
   };
 
   const deletePromo = async (promo: Promo) => {
     try {
+      store.setRequestLoading(true);
       const res = await fetch(`http://localhost:3000/api/promo/${promo.id}`, {
         method: "DELETE",
         credentials: "include",
@@ -122,11 +150,14 @@ export default function PromoManagement() {
         },
       });
       if (res) {
-        toast.success("Item deleted.");
+        toast.success("Promo deleted.");
+        store.setRequestLoading(false);
         return getData(); //will refresh and get updated data
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      store.setRequestLoading(false);
     }
   };
 
@@ -137,6 +168,7 @@ export default function PromoManagement() {
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell align="center">Promo Name</TableCell>
                 <TableCell align="center">Promo Type</TableCell>
                 <TableCell align="center">Discount Percentage</TableCell>
                 <TableCell align="center">Min Spend</TableCell>
@@ -153,6 +185,9 @@ export default function PromoManagement() {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell align="center" component="th" scope="row">
+                    {row.name}
+                  </TableCell>
+                  <TableCell align="center" component="th" scope="row">
                     {row.type}
                   </TableCell>
                   <TableCell align="center">{row.discount}%</TableCell>
@@ -162,7 +197,7 @@ export default function PromoManagement() {
                     <PromoStatus status={row.status} />
                   </TableCell>
                   <TableCell align="center">
-                    <Tooltip title="Edit">
+                    {/* <Tooltip title="Edit">
                       <IconButton
                         onClick={() => {
                           router.push(
@@ -172,7 +207,7 @@ export default function PromoManagement() {
                       >
                         <EditOutlinedIcon />
                       </IconButton>
-                    </Tooltip>
+                    </Tooltip> */}
                     <Tooltip title="Apply">
                       <IconButton
                         onClick={() => {
@@ -185,13 +220,38 @@ export default function PromoManagement() {
                     <Tooltip title="Delete">
                       <IconButton
                         onClick={() => {
-                          deletePromo(row);
+                          handleOpen();
                         }}
                       >
                         <DeleteOutlineOutlinedIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
+                  <Modal open={open} onClose={handleClose}>
+                    <Box sx={modalBoxStyle}>
+                      <Typography
+                        id="modal-modal-title"
+                        variant="h6"
+                        component="h2"
+                      >
+                        Are you sure you want to delete?
+                      </Typography>
+                      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        This action cannot be undone.
+                      </Typography>
+                      <div className="w-full flex justify-end mt-5">
+                        <Button
+                          variant="text"
+                          color="error"
+                          onClick={() => {
+                            deletePromo(row);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </Box>
+                  </Modal>
                 </TableRow>
               ))}
             </TableBody>
@@ -210,6 +270,7 @@ export default function PromoManagement() {
           </Button>
         </Link>
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

@@ -8,43 +8,29 @@ import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
 import WhereToVoteIcon from "@mui/icons-material/WhereToVote";
 import EastIcon from "@mui/icons-material/East";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { Button, Grid, Modal, TextField, Typography } from "@mui/material";
-import CustomizedSwitches from "@/components/riderComponents/Switch";
+import { Button, Grid, Modal, TextField } from "@mui/material";
+import CustomizedSwitches from "@/components/cafeComponents/Switch";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import SentimentSatisfiedIcon from "@mui/icons-material/SentimentSatisfied";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVerySatisfiedIcon from "@mui/icons-material/SentimentVerySatisfied";
 import Link from "next/link";
-
-type OrderLine = {
-  id: number;
-  p1: string;
-  quantity: number;
-  price1: string;
-  loc: string;
-  status: boolean;
-};
-
-export const Order: OrderLine = {
-  id: 1,
-  p1: "Laksa",
-  price1: "RM5",
-  quantity: 1,
-  loc: "KKE",
-  status: true,
-};
+import { Order } from "@/types/Order.type";
+import toast from "react-hot-toast";
+import { io } from "socket.io-client";
+import { useRouter } from "next/navigation";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const style = {
   position: "absolute" as "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 600,
+  width: 800,
   bgcolor: "background.paper",
   // border: '2px solid #000',
   boxShadow: 24,
-  justifyContent: "center",
-  alignItems: "center",
   p: 4,
 };
 
@@ -52,16 +38,80 @@ const selectedStyle = {
   backgroundColor: "#778CCC",
 };
 
-const pickupButton = {
-  backgroundColor: "#B0D097",
-};
-
-const NewOrderDetails = () => {
+const OrderDetails = ({ params }: { params: { id: string } }) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
   };
+  const [socket, setSocket] = React.useState<any>(undefined);
+  const [order, setOrder] = React.useState<Order>({} as Order);
+  const router = useRouter();
+  const store = useStore();
+
+  const getData = async () => {
+    store.setRequestLoading(true);
+    const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed up");
+    }
+    setOrder(await res.json());
+    store.setRequestLoading(false);
+  };
+
+  const updateToDelivery = async () => {
+    store.setRequestLoading(true);
+    const res = await fetch(
+      `http://localhost:3000/api/orders/updateToDelivery/${params.id}`,
+      {
+        method: "PUT",
+      }
+    );
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed Up");
+    }
+
+    toast.success("Status Updated Successfully");
+    socket.emit("delivery", true);
+    store.setRequestLoading(false);
+    return router.push("/userRider/order");
+  };
+
+  React.useEffect(() => {
+    getData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const [subtotal, setSubtotal] = React.useState<number>(0);
+  const calculateSubtotal = () => {
+    let x: number = 0;
+    order?.products?.forEach((product) => {
+      x += Number(product.amount);
+    });
+    // x += order.deliveryFee as number;
+    setSubtotal(x);
+  };
+
+  React.useEffect(() => {
+    calculateSubtotal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
+
+  React.useEffect(() => {
+    const socket = io("http://localhost:3001");
+
+    socket.on("update_user", (update) => {
+      if (update) {
+        getData();
+      }
+    });
+
+    setSocket(socket);
+  }, []);
 
   return (
     <Box
@@ -75,43 +125,62 @@ const NewOrderDetails = () => {
           m: 1,
           pt: 10,
           width: 600,
-          height: 600,
+          height: "auto",
+          pb: 10,
         },
       }}
     >
       <Paper elevation={1}>
         <div className="flex flex-col items-center justify-center">
           <h1 className="text-bold text-2xl">There's an order for you!</h1>
-          <h1>#0001</h1>
+          <h1 className="text-xl font-bold">#{order?.id?.slice(-5)}</h1>
           <h1 className="underline underline-offset-4">Order Details</h1>
           <Box
             sx={{ display: "flex", justifyContent: "center", width: "100%" }}
           >
             <Grid container>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                xs={6}
-              >
-                <h1>
-                  {Order.quantity} x {Order.p1}
-                </h1>
-              </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                xs={6}
-              >
-                <h1>{Order.price1}</h1>
-              </Grid>
+              {order?.products?.map((row) => (
+                <>
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    xs={6}
+                  >
+                    <h1>
+                      {row.quantity} x {row.name}
+                    </h1>
+                  </Grid>
+
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    xs={6}
+                  >
+                    <h1>{row.amount}</h1>
+                  </Grid>
+
+                  <Grid
+                    item
+                    sx={{
+                      display: "flex",
+                      justifyContent: "start",
+                      alignItems: "center",
+                      pl: 10,
+                    }}
+                    xs={12}
+                  >
+                    <h1>{row.noteToCafe}</h1>
+                  </Grid>
+                </>
+              ))}
               <Grid
                 item
                 sx={{
@@ -132,8 +201,9 @@ const NewOrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1>{Order.price1}</h1>
+                <h1>{subtotal}</h1>
               </Grid>
+
               <Grid
                 item
                 sx={{
@@ -154,7 +224,7 @@ const NewOrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>{order?.deliveryFee}</h1>
               </Grid>
               <Grid
                 item
@@ -176,7 +246,11 @@ const NewOrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>
+                  {Number(subtotal) +
+                    Number(order?.deliveryFee) -
+                    order?.totalPrice}
+                </h1>
               </Grid>
               <Grid
                 item
@@ -198,48 +272,8 @@ const NewOrderDetails = () => {
                 }}
                 xs={6}
               >
-                <h1 className="text-xl font-bold">RM5</h1>
+                <h1 className="text-xl font-bold">RM{order?.totalPrice}</h1>
               </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Delivered to: {Order.loc}</h1>
-              </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Note from Student: Meet at lobby</h1>
-              </Grid>
-
-              {/* <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "end",
-                  alignItems: "center",
-                  pr: 10,
-                }}
-                xs={12}
-              >
-                <CustomizedSwitches
-                  label="Pick up"
-                  handleOpen={handleOpen}
-                />
-              </Grid> */}
               <Grid
                 item
                 sx={{
@@ -248,6 +282,69 @@ const NewOrderDetails = () => {
                   alignItems: "center",
                   pl: 10,
                   pt: 5,
+                  pb: 1,
+                }}
+                xs={12}
+              >
+                <h1>
+                  Pick Up at:{" "}
+                  {`${order?.cafe?.name} (${order?.cafe?.loc.location})`}
+                </h1>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  pl: 10,
+
+                  pb: 1,
+                }}
+                xs={12}
+              >
+                <h1>Deliver to: {order?.deliveryAddress}</h1>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  pl: 10,
+                }}
+                xs={12}
+              >
+                <h1>Note from Student: {order?.noteToRider}</h1>
+              </Grid>
+
+              <div></div>
+              {order.deliveryOption === "DELIVERY" &&
+              order.status === "PICKUP" ? (
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    justifyContent: "end",
+                    alignItems: "center",
+                    pr: 10,
+                  }}
+                  xs={12}
+                >
+                  <CustomizedSwitches
+                    label="Update to Delivering"
+                    handleOpen={updateToDelivery}
+                  />
+                </Grid>
+              ) : null}
+              <Grid
+                item
+                sx={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  pl: 10,
+                  pt: 3,
                 }}
                 xs={12}
               >
@@ -258,57 +355,13 @@ const NewOrderDetails = () => {
                   </Button>
                 </Link>
               </Grid>
-
-              {/* Update status button */}
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  p: 10,
-                }}
-                xs={12}
-              >
-                {Order.status ? (
-                  <Button fullWidth variant="contained" style={pickupButton}>
-                    <h1 className="pl-2">Picked Up</h1>
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleOpen}
-                    fullWidth
-                    variant="contained"
-                    style={pickupButton}
-                  >
-                    <h1 className="pl-2">Delivered</h1>
-                  </Button>
-                )}
-              </Grid>
             </Grid>
           </Box>
         </div>
       </Paper>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <div className="flex flex-col justify-center items-center">
-            <h1>Order Completed!</h1>
-            <h1>You've earned RM2!</h1>
-            <Link href={`/`}>
-              <Button variant="contained" style={selectedStyle}>
-                <h1 className="pl-2">Okay!</h1>
-              </Button>
-            </Link>
-          </div>
-        </Box>
-      </Modal>
+      {store.requestLoading && <Loading />}
     </Box>
   );
 };
 
-export default NewOrderDetails;
+export default OrderDetails;

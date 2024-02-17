@@ -1,45 +1,48 @@
+"use client";
+
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Search from "@/components/studentComponents/Search";
 import { FilteredCafe } from "@/types/Cafe.type";
 import CafeCard from "@/components/studentComponents/CafeCard";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
-const getData = async () => {
-  const res = await fetch("http://localhost:3000/api/cafe", {
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    console.log(res);
-    throw new Error("Screwed up");
-  }
-  return res.json();
-};
+const CafeList = () => {
+  const store = useStore();
+  const [cafe, setCafe] = useState<FilteredCafe[]>([] as FilteredCafe[]);
 
-const CafeList = async () => {
-  const cafe: FilteredCafe[] = await getData();
+  const getData = async () => {
+    store.setRequestLoading(true);
+    const res = await fetch("http://localhost:3000/api/cafe", {
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      console.log(res);
+      throw new Error("Screwed up");
+    }
+    store.setRequestLoading(false);
+    setCafe(await res.json());
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   return (
     <div className="flex flex-col p-10">
       {/* <Search/> */}
-      <span className="font-bold text-2xl pt-20">All Cafes</span>
+      <span className="font-bold text-3xl py-20">All Cafes</span>
 
       <div className="flex pb-20 justify-around ">
         {cafe.map((Cafe) => (
           <Link href={`/userStudent/cafe/${Cafe.id}`} key={Cafe.id}>
             <CafeCard cafe={Cafe} />
-            {/* <div key={Cafe.id} className=" h-60 w-80 justify-start ">
-              <img
-                // Cafe.cafeImg as string
-                src={`https://res.cloudinary.com/devlognxn/image/upload/${Cafe.cafeImg}.jpg`}
-                alt={Cafe.cafeName}
-                width={400}
-                height={300}
-              />
-              <span>{Cafe.cafeName}</span>
-            </div> */}
           </Link>
         ))}
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 };

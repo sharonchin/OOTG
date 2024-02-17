@@ -27,6 +27,37 @@ export const PUT = async (
         status: "COMPLETED",
       },
     });
+
+    const student = await prisma.student.update({
+      where: {
+        id: order.studentId,
+      },
+      data: {
+        completedOrder: { increment: 1 },
+      },
+    });
+
+    if ((student.completedOrder as any) % 10 === 0) {
+      const foodiePassport = await prisma.foodiePassport.create({
+        data: {
+          min_spend_amount: 0,
+          capped_amount: 5,
+          amount: 5,
+          studentId: student.id,
+        },
+      });
+    }
+
+    if (order.deliveryOption === "DELIVERY") {
+      const rider = await prisma.rider.update({
+        where: {
+          id: order.riderId as string,
+        },
+        data: {
+          status: true,
+        },
+      });
+    }
     return new NextResponse(JSON.stringify(order), { status: 200 });
   } catch (err) {
     console.log(err);

@@ -161,13 +161,7 @@ export default function Login() {
             </Button>
           </form>
         </FormProvider>
-        <div className="flex justify-between w-full items-center">
-          <Link href="/forgotPassword">
-            <h1>
-              <em>Forgot password?</em>
-            </h1>
-          </Link>
-        </div>
+
         <div className="flex justify-center items-center flex-row pt-10">
           <h1>Don't have an account?</h1>
           <Link href="/signUp">

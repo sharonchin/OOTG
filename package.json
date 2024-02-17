@@ -20,6 +20,7 @@
     "axios": "^1.6.1",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
+    "firebase": "^10.7.1",
     "jose": "^5.1.0",
     "moment": "^2.29.4",
     "next": "^14.0.0",
@@ -28,7 +29,9 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.48.2",
     "react-hot-toast": "^2.4.1",
+    "socket.io-client": "^4.7.2",
     "stripe": "^14.5.0",
+    "styled-components": "^6.1.6",
     "zod": "^3.22.4",
     "zustand": "^4.4.6"
   },

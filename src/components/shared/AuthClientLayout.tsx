@@ -2,6 +2,7 @@
 
 import React from "react";
 import useSession from "@/lib/useSession";
+import NoLinkHeader from "@/components/shared/Header";
 import StudentHeader from "@/components/studentComponents/StudentHeader";
 import CafeHeader from "@/components/cafeComponents/CafeHeader";
 import RiderHeader from "@/components/riderComponents/RiderHeader";
@@ -18,7 +19,7 @@ const AuthClientLayout = ({ children }: { children: React.ReactNode }) => {
     <>
       {!user && (
         <div className="flex flex-col justify-between h-screen">
-          <CafeHeader />
+          <NoLinkHeader />
           <div className="flex flex-col justify-center items-center pt-10">
             {children}
           </div>

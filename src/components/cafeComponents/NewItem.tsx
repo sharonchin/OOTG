@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { Button, Divider, Grid, Modal, TextField } from "@mui/material";
+import { Button, Chip, Divider, Grid, Modal, TextField } from "@mui/material";
 import FormInput from "../shared/FormInput";
 import AVAILABILITY from "@/constants/AVAILABILITY";
 import { useDropzone } from "react-dropzone";
@@ -27,6 +27,8 @@ const NewItem = () => {
   const [path, setPath] = React.useState<string>("");
   const store = useStore();
   const router = useRouter();
+  const [keywords, setKeywords] = React.useState<string[]>([]);
+  const [inputValue, setInputValue] = React.useState("");
   const methods = useForm<CreateProductInput>({
     defaultValues: {
       img: "",
@@ -53,6 +55,20 @@ const NewItem = () => {
     register("cafeId", { value: user?.cafe?.id });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [register]);
+
+  const handleKeyDown = (event: any) => {
+    if (event.key === ",") {
+      event.preventDefault();
+      if (inputValue && !keywords.includes(inputValue)) {
+        setKeywords([...keywords, inputValue]);
+      }
+      setInputValue("");
+    }
+  };
+
+  const handleDelete = (chipToDelete: any) => {
+    setKeywords((chips) => chips.filter((chip) => chip !== chipToDelete));
+  };
 
   const ImageUpload = () => {
     const onDrop = React.useCallback((acceptedImages: File[]) => {
@@ -115,7 +131,7 @@ const NewItem = () => {
       try {
         const img = await apiCreateProduct(JSON.stringify(values));
         if (img) {
-          toast.success("Image uploaded");
+          toast.success("Item created!");
           return router.push("/userCafe/management/item");
         }
       } catch (error: any) {
@@ -185,6 +201,41 @@ const NewItem = () => {
                   </span>
                 )}
               </div>
+
+              <div className="">
+                <label
+                  htmlFor="keywords"
+                  className="block text-ct-blue-600 mb-3"
+                >
+                  Keywords
+                </label>
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    placeholder="Press ',' to input new keyword"
+                    className="block w-full rounded-2xl appearance-none focus:outline-none py-2 px-4 bg-[#F1F5F9]"
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                  />
+                  <div className="flex flex-wrap pt-2">
+                    {keywords.map((keyword) => (
+                      <Chip
+                        key={keyword}
+                        label={keyword}
+                        onDelete={() => handleDelete(keyword)}
+                        className="m-2"
+                      />
+                    ))}
+                  </div>
+                </div>
+                {errors["keywords"] && (
+                  <span className="text-red-500 text-xs pt-1 block">
+                    {errors["keywords"]?.message as string}
+                  </span>
+                )}
+              </div>
+
               <div className="flex flex-row justify-around pt-2 gap-3">
                 <label>
                   <div className="flex items-center gap-2 ">

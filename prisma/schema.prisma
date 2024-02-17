@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -19,16 +20,19 @@ model User {
 }
 
 model Student {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  firstName String
-  lastName  String
-  email     String   @unique
-  password  String
-  phoneNo   String   @unique
-  Order     Order[]
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
+  id             String           @id @default(cuid())
+  createdAt      DateTime         @default(now())
+  firstName      String
+  lastName       String
+  email          String           @unique
+  password       String
+  phoneNo        String           @unique
+  Order          Order[]
+  user           User             @relation(fields: [userId], references: [id])
+  userId         String           @unique
+  FoodiePassport FoodiePassport[]
+  completedOrder Decimal          @default(0)
+  Rating         Rating[]
 }
 
 model Cafe {
@@ -49,6 +53,7 @@ model Cafe {
   user          User         @relation(fields: [userId], references: [id])
   userId        String       @unique
   Promo         Promo[]
+  Rating        Rating[]
 }
 
 model Rider {
@@ -61,8 +66,10 @@ model Rider {
   phoneNo      String       @unique
   deliveryMode DeliveryMode
   vehicleNo    String?
+  status       Boolean      @default(true)
   user         User         @relation(fields: [userId], references: [id])
   userId       String       @unique
+  Order        Order[]
 }
 
 model Product {
@@ -76,40 +83,48 @@ model Product {
   availability    Boolean         @default(true)
   cafe            Cafe            @relation(fields: [cafeId], references: [id])
   cafeId          String
-  // OrderLine       OrderLine[]
+  keywords        String[]
 }
 
 model Order {
-  id             String         @id @default(cuid())
-  createdAt      DateTime       @default(now())
-  totalPrice     Decimal
-  products       Json[]
-  status         Status
-  intentId       String?        @unique
-  student        Student        @relation(fields: [studentId], references: [id])
-  studentId      String
-  paymentType    PaymentType
-  cafe           Cafe           @relation(fields: [cafeId], references: [id])
-  cafeId         String
-  cutleryOption  Boolean?       @default(false)
-  deliveryOption DeliveryOption
-  // OrderLine  OrderLine[]
+  id              String         @id @default(cuid())
+  createdAt       DateTime       @default(now())
+  totalPrice      Decimal
+  products        Json[]
+  status          Status
+  intentId        String?        @unique
+  student         Student        @relation(fields: [studentId], references: [id])
+  studentId       String
+  paymentType     PaymentType
+  cafe            Cafe           @relation(fields: [cafeId], references: [id])
+  cafeId          String
+  cutleryOption   Boolean?       @default(false)
+  deliveryOption  DeliveryOption
+  deliveryFee     Decimal?       @default(2)
+  deliveryAddress String?
+  noteToRider     String?
+  rider           Rider?         @relation(fields: [riderId], references: [id])
+  riderId         String?
+  rating          Rating[]
 }
 
-// model OrderLine {
-//   id          String  @id @default(cuid())
-//   product     Product @relation(fields: [productId], references: [id])
-//   productId   String
-//   order       Order   @relation(fields: [orderId], references: [id])
-//   orderId     String
-//   quantity    Int
-//   studentNote String?
-// }
+model FoodiePassport {
+  id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  type             PromoType @default(FOODIE_PASSPORT)
+  min_spend_amount Decimal
+  capped_amount    Decimal
+  amount           Decimal?
+  status           Boolean   @default(true)
+  student          Student   @relation(fields: [studentId], references: [id])
+  studentId        String
+}
 
 model Promo {
   id               String    @id @default(cuid())
   createdAt        DateTime  @default(now())
   type             PromoType
+  name             String?
   discount         Decimal
   min_spend_amount Decimal
   capped_amount    Decimal
@@ -125,9 +140,23 @@ model Location {
   Cafe     Cafe[]
 }
 
+model Rating {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  rating    Decimal
+  review    String?
+  cafe      Cafe     @relation(fields: [cafeId], references: [id])
+  cafeId    String
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId String
+}
+
 enum PromoType {
   DELIVERY_VOUCHER
   DISCOUNT_VOUCHER
+  FOODIE_PASSPORT
 }
 
 enum CafeCategory {
@@ -138,6 +167,9 @@ enum CafeCategory {
 
 enum ProductCategory {
   NOODLE
+  FASTFOOD
+  SOUP
+  DESSERT
   RICE
   WESTERN
   BEVERAGE

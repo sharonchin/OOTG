@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const cafe = await prisma.cafe.create({
       data: {
-        img: data.file,
+        img: data.img,
         name: data.name,
         email: data.email,
         password: hashedPassword,

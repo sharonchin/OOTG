@@ -1,3 +1,5 @@
+import { Rating } from "./Rating.type";
+
 export type FilteredCafe = {
   id: string;
   createdAt: string;
@@ -12,8 +14,9 @@ export type FilteredCafe = {
   };
   cafeCategory: string;
   operatingHour: string;
-  status: string;
+  status: boolean;
   userId: string;
+  Rating: Rating[];
 };
 
 export interface CafeResponse {

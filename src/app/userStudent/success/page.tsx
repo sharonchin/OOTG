@@ -2,14 +2,19 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
+import { io } from "socket.io-client";
 
 const SuccessPage = () => {
   const searchParams = useSearchParams();
   const payment_intent = searchParams.get("payment_intent");
   const router = useRouter();
 
+  const [socket, setSocket] = React.useState<any>(undefined);
+
+  
   useEffect(() => {
     const makeRequest = async () => {
+      const socket = io("http://localhost:3001");
       try {
         console.log(`pi: ${payment_intent}`);
         const res = await fetch(
@@ -20,8 +25,8 @@ const SuccessPage = () => {
         );
 
         const order = await res.json();
-        console.log(order);
-        router.push(`/orders/${order.order.id}`);
+        socket.emit("receive_order", order.order)
+        router.push(`/userStudent/orders/${order.order.id}`);
       } catch (err) {
         console.log(err);
       }

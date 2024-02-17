@@ -1,56 +1,58 @@
+"use client";
+
+import Loading from "@/components/shared/Loading";
 import ProductCard from "@/components/studentComponents/ProductCard";
+import useStore from "@/store";
 import { FilteredCafe } from "@/types/Cafe.type";
 import { Product } from "@/types/Product.type";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const CafeDetails = async ({ params }: { params: { id: string } }) => {
-  const getCafe = async () => {
-    const res = await fetch(`http://localhost:3000/api/cafe/${params.id}`, {
+const CafeDetails = ({ params }: { params: { id: string } }) => {
+  const store = useStore();
+  const [cafe, setCafe] = useState<FilteredCafe>({} as FilteredCafe);
+  const [products, setProducts] = useState<Product[]>([] as Product[]);
+  const getData = async () => {
+    store.setRequestLoading(true);
+    const cafeRes = await fetch(`http://localhost:3000/api/cafe/${params.id}`, {
       cache: "no-store",
     });
-    if (!res.ok) {
-      console.log(res);
-      throw new Error("Screwed up");
-    }
-    return res.json();
-  };
-
-  const cafe: FilteredCafe = await getCafe();
-
-  const getProduct = async () => {
-    const res = await fetch(
+    const productRes = await fetch(
       `http://localhost:3000/api/product?cafe=${params.id}`,
       {
         cache: "no-store",
       }
     );
-    if (!res.ok) {
-      console.log(res);
+    if (!cafeRes.ok || !productRes.ok) {
       throw new Error("Screwed up");
     }
-    return res.json();
+
+    setCafe(await cafeRes.json());
+    setProducts(await productRes.json());
+    store.setRequestLoading(false);
   };
 
-  const products: Product[] = await getProduct();
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
     <div className="flex flex-col">
-      <div className="flex pb-20 flex-row justify-center items-center mx-8">
+      <div className="flex pt-20 pb-20 flex-row justify-center items-center mx-8">
         {/*ProductWrapper */}
         <div className=" h-100 w-200 ">
           {/* ImageContainer */}
           <img
             src={`https://res.cloudinary.com/devlognxn/image/upload/v1699984254/${cafe.img}.jpg`}
             alt={cafe.name}
-            width={500}
-            height={400}
+            width={400}
+            height={300}
           />
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 pl-10">
           <h1 className="text-4xl font-extrabold">{cafe.name}</h1>
-          <h1 className="text-xl">{cafe.loc.location}</h1>
+          <h1 className="text-xl">{cafe.loc?.location}</h1>
           <h1 className="text-xl">{cafe.operatingHour}</h1>
         </div>
       </div>
@@ -65,22 +67,7 @@ const CafeDetails = async ({ params }: { params: { id: string } }) => {
         ))}
       </div>
 
-      {/* {products.map((product) => (
-        <div className="w-80 ">
-          <Link href={`/product/${product.id}`}>
-            <img
-              src={`https://res.cloudinary.com/devlognxn/image/upload/v1699984254/${product.img}.jpg`}
-              alt={product.name}
-              width={200}
-              height={300}
-            />
-          </Link>
-          <div className="flex-col mb-10">
-            <h1>{product.name}</h1>
-            <h1>{product.price}</h1>
-          </div>
-        </div>
-      ))} */}
+      {store.requestLoading && <Loading />}
     </div>
   );
 };

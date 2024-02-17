@@ -79,6 +79,24 @@ export async function apiLogoutStudent(): Promise<void> {
   return handleResponse<void>(response);
 }
 
+export async function apiUpdateStudent(
+  credentials: string,
+  studentId: string
+): Promise<FilteredStudent> {
+  const response = await fetch(`${SERVER_ENDPOINT}/api/student/${studentId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: credentials,
+  });
+
+  return handleResponse<StudentResponse>(response).then(
+    (data) => data.data.student
+  );
+}
+
 export async function apiGetAuthStudent(
   token?: string
 ): Promise<FilteredStudent> {
@@ -140,6 +158,22 @@ export async function apiLogoutCafe(): Promise<void> {
   return handleResponse<void>(response);
 }
 
+export async function apiUpdateCafe(
+  credentials: string,
+  cafeId: string
+): Promise<FilteredCafe> {
+  const response = await fetch(`${SERVER_ENDPOINT}/api/cafe/${cafeId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: credentials,
+  });
+
+  return handleResponse<CafeResponse>(response).then((data) => data.data.cafe);
+}
+
 export async function apiGetAuthCafe(token?: string): Promise<FilteredCafe> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -199,6 +233,24 @@ export async function apiLogoutRider(): Promise<void> {
   });
 
   return handleResponse<void>(response);
+}
+
+export async function apiUpdateRider(
+  credentials: string,
+  riderId: string
+): Promise<FilteredRider> {
+  const response = await fetch(`${SERVER_ENDPOINT}/api/rider/${riderId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: credentials,
+  });
+
+  return handleResponse<RiderResponse>(response).then(
+    (data) => data.data.rider
+  );
 }
 
 export async function apiGetAuthUser(token?: string): Promise<User> {

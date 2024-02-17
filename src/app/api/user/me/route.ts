@@ -16,11 +16,14 @@ export async function GET(req: NextRequest) {
     where: { id: userId },
     include: {
       student: true,
-      cafe: true,
+      cafe: {
+        include: {
+          Rating: true,
+        },
+      },
       rider: true,
     },
   });
-  console.log(userId);
   return NextResponse.json({
     status: "success",
     data: { user: user },

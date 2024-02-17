@@ -2,14 +2,12 @@
 import * as React from "react";
 import { Button, Divider, Grid, Modal, TextField } from "@mui/material";
 import FormInput from "../shared/FormInput";
-import AVAILABILITY from "@/constants/AVAILABILITY";
 import { useDropzone } from "react-dropzone";
 import { FormProvider, useForm, SubmitHandler } from "react-hook-form";
 import { useEffect } from "react";
 import useStore from "@/store";
 import { handleApiError } from "@/lib/helpers";
 import { useRouter } from "next/navigation";
-import error from "next/error";
 import toast from "react-hot-toast";
 import PRODUCT_CATEGORY from "@/constants/PRODUCT_CATEGORY";
 import { apiUpdateProduct } from "@/lib/api-requests";
@@ -34,7 +32,6 @@ const EditItem = ({ product }: EditItemProps) => {
   const [path, setPath] = React.useState<string>("");
   const store = useStore();
   const router = useRouter();
-  //   const [product, setProduct] = React.useState<Product>({} as Product);
   const methods = useForm<UpdateProductInput>({
     resolver: zodResolver(ProductUpdateSchema),
     defaultValues: {
@@ -45,21 +42,6 @@ const EditItem = ({ product }: EditItemProps) => {
       productCategory: product?.productCategory as PRODUCT_CATEGORY,
     },
   });
-
-  //   const getData = async () => {
-  //     const res = await fetch(`http://localhost:3000/api/product/${productId}`, {
-  //       cache: "no-store",
-  //     });
-  //     if (!res.ok) {
-  //       console.log(res);
-  //       throw new Error("Screwed up");
-  //     }
-  //     setProduct(await res.json());
-  //     // setValue("name", product?.name);
-  //     // setValue("price", product?.price);
-  //     // setValue("desc", product?.desc);
-  //     // setValue("productCategory", product?.productCategory as PRODUCT_CATEGORY);
-  //   };
 
   React.useEffect(() => {
     setValue("name", product?.name);
@@ -137,7 +119,7 @@ const EditItem = ({ product }: EditItemProps) => {
           );
           if (img) {
             toast.success("Product updated!");
-            return router.push("/management/item");
+            return router.push("/userCafe/management/item");
           }
         } catch (error: any) {
           if (error instanceof Error) {
@@ -180,7 +162,7 @@ const EditItem = ({ product }: EditItemProps) => {
           );
           if (img) {
             toast.success("Image uploaded");
-            return router.push("/management/item");
+            return router.push("/userCafe/management/item");
           }
         } catch (error: any) {
           if (error instanceof Error) {
@@ -250,20 +232,6 @@ const EditItem = ({ product }: EditItemProps) => {
                   </span>
                 )}
               </div>
-              {/* <div className="flex flex-row justify-around pt-2 gap-3">
-                <label>
-                  <div className="flex items-center gap-2 ">
-                    <input type="radio" value={1 as AVAILABILITY} />
-                    <h1>Available</h1>
-                  </div>
-                </label>
-                <label>
-                  <div className="flex items-center gap-2">
-                    <input type="radio" value={2 as AVAILABILITY} />
-                    <h1>Unavailable</h1>
-                  </div>
-                </label>
-              </div> */}
             </div>
           </div>
 
@@ -281,7 +249,7 @@ const EditItem = ({ product }: EditItemProps) => {
               style={selectedStyle}
               className=" bg-[#778ccc] text-white"
               onClick={() => {
-                router.push("/management/item");
+                router.push("/userCafe/management/item");
               }}
             >
               Cancel

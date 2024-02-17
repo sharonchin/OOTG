@@ -11,6 +11,9 @@ import {
   TableHead,
   TableRow,
   Tooltip,
+  Modal,
+  Box,
+  Typography,
 } from "@mui/material";
 import React from "react";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
@@ -22,9 +25,22 @@ import { Product } from "@/types/Product.type";
 import useSession from "@/lib/useSession";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 const selectedStyle = {
   backgroundColor: "#778CCC",
+};
+
+const modalBoxStyle = {
+  position: "absolute" as "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  p: 4,
 };
 
 export default function ItemManagement() {
@@ -43,8 +59,10 @@ export default function ItemManagement() {
     setOpen(false);
   };
   const user = useSession();
+  const store = useStore();
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/product?cafe=${user?.cafe?.id}`,
       {
@@ -56,6 +74,7 @@ export default function ItemManagement() {
       throw new Error("Screwed up");
     }
     setProducts(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -65,6 +84,7 @@ export default function ItemManagement() {
 
   const deleteProduct = async (product: Product) => {
     try {
+      store.setRequestLoading(true);
       const res = await fetch(
         `http://localhost:3000/api/product/${product.id}`,
         {
@@ -81,11 +101,14 @@ export default function ItemManagement() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      store.setRequestLoading(false);
     }
   };
   const changeAvailability = async (product: Product) => {
     if (product.availability) {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/product/changeUnavailable/${product.id}`,
           {
@@ -98,13 +121,17 @@ export default function ItemManagement() {
         );
         if (res) {
           toast.success("Item is unavailable now.");
+          store.setRequestLoading(false);
           return getData(); //will refresh and get updated data
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     } else {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/product/changeAvailable/${product.id}`,
           {
@@ -117,10 +144,13 @@ export default function ItemManagement() {
         );
         if (res) {
           toast.success("Item is available now.");
+          store.setRequestLoading(false);
           return getData(); //will refresh and get updated data
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     }
   };
@@ -147,6 +177,7 @@ export default function ItemManagement() {
                 <TableCell align="center">Category</TableCell>
                 <TableCell align="center">Desc</TableCell>
                 <TableCell align="center">Price</TableCell>
+                <TableCell align="center">Keywords</TableCell>
                 <TableCell align="center">Product Availability</TableCell>
                 <TableCell align="center">Action</TableCell>
               </TableRow>
@@ -165,13 +196,15 @@ export default function ItemManagement() {
                       height={100}
                     />
                   </TableCell>
-                  {/* <TableCell align="center" component="th" scope="row">
-                    {row.id}
-                  </TableCell> */}
+ 
                   <TableCell align="center">{row.name}</TableCell>
                   <TableCell align="center">{row.productCategory}</TableCell>
                   <TableCell align="center">{row.desc}</TableCell>
                   <TableCell align="center">{row.price}</TableCell>
+
+                  <TableCell align="center">
+                    {row.keywords.map((keyword) => `${keyword},`)}
+                  </TableCell>
                   <TableCell align="center">
                     <Availability availability={row.availability} />
                   </TableCell>
@@ -199,13 +232,38 @@ export default function ItemManagement() {
                     <Tooltip title="Delete">
                       <IconButton
                         onClick={() => {
-                          deleteProduct(row);
+                          handleOpen();
                         }}
                       >
                         <DeleteOutlineOutlinedIcon />
                       </IconButton>
                     </Tooltip>
                   </TableCell>
+                  <Modal open={open} onClose={handleClose}>
+                    <Box sx={modalBoxStyle}>
+                      <Typography
+                        id="modal-modal-title"
+                        variant="h6"
+                        component="h2"
+                      >
+                        Are you sure you want to delete?
+                      </Typography>
+                      <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                        This action cannot be undone.
+                      </Typography>
+                      <div className="w-full flex justify-end mt-5">
+                        <Button
+                          variant="text"
+                          color="error"
+                          onClick={() => {
+                            deleteProduct(row);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </Box>
+                  </Modal>
                 </TableRow>
               ))}
             </TableBody>
@@ -231,6 +289,7 @@ export default function ItemManagement() {
           Save
         </Button> */}
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

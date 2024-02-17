@@ -6,7 +6,7 @@ import { persist } from "zustand/middleware";
 const INITIAL_STATE = {
   products: [],
   totalItems: 0,
-  totalPrice: 0,
+  totalPrice: 0 as number,
   deliveryOption: "DELIVERY" as DELIVERY_OPTION,
 };
 
@@ -21,7 +21,7 @@ export const useCartStore = create(
         set((state) => ({
           products: [...state.products, item],
           totalItems: state.totalItems + item.quantity,
-          totalPrice: state.totalPrice + item.amount,
+          totalPrice: state.totalPrice + Number(item.amount),
         }));
       },
       removeFromCart(item) {
