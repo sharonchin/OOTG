@@ -12,6 +12,7 @@ import useStore from "@/store";
 import Loading from "../shared/Loading";
 import { useCartStore } from "@/cart";
 import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
+import useSession from "@/lib/useSession";
 
 const Cafes = () => {
   const [cafes, setCafes] = React.useState<FilteredCafe[]>(
@@ -20,7 +21,7 @@ const Cafes = () => {
   const [activeRider, setActiveRider] = React.useState<number>(0);
   const store = useStore();
   const { selectDeliveryOption } = useCartStore();
-
+  const user = useSession();
   useEffect(() => {
     useCartStore.persist.rehydrate();
   }, []);
@@ -84,7 +85,12 @@ const Cafes = () => {
   return (
     <div className="flex flex-col">
       {store.requestLoading && <Loading />}
-      <div className="h-3/4 w-full flex justify-between flex-row pt-20 col-md-4 ">
+      <div className="flex pt-10">
+        <h1 className="font-bold text-2xl">
+          Welcome Back {user?.student?.firstName}!
+        </h1>
+      </div>
+      <div className="h-3/4 w-full flex justify-between flex-row pt-10 col-md-4 ">
         {/*Top*/}
 
         <ButtonGroup variant="outlined" aria-label="outlined button group">
@@ -126,7 +132,7 @@ const Cafes = () => {
         </ButtonGroup> */}
       </div>
 
-      <span className="text-3xl font-bold py-10">All cafes</span>
+      <span className="text-3xl font-bold py-10">Recommended cafes</span>
 
       {/* WRAPPER */}
       <div className="flex flex-row gap-5 justify-around">

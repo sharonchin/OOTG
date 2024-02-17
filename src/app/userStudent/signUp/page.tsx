@@ -58,7 +58,6 @@ export default function SignUp() {
   }
 
   const onSubmitHandler: SubmitHandler<RegisterStudentInput> = (values) => {
-    console.log(values);
     RegisterStudentFunction(values);
   };
 

@@ -100,7 +100,7 @@ const NewPromo = () => {
             onSubmit={handleSubmit(onSubmitHandler)}
             className="max-w-md w-full mx-auto overflow-hidden bg-ct-dark-200 rounded-2xl p-8 space-y-5 flex flex-col items-center"
           >
-            <div className="flex flex-row justify-around gap-5">
+            <div className="flex flex-row justify-around gap-10">
               <label>
                 <div className="flex">
                   <input
@@ -125,7 +125,7 @@ const NewPromo = () => {
               </label>
             </div>
             {value === "DISCOUNT_VOUCHER" && (
-              <div className="flex flex-row gap-15 item-center justify-center">
+              <div className="flex flex-row gap-15 item-center justify-around w-full">
                 <FormInput label="Name" name="name" />
                 <FormInput label="Discount (%)" name="discount" valueAsNumber />
                 <FormInput

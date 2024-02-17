@@ -1,12 +1,18 @@
 "use client";
 import ootg from "./../../../public/assets/ootg.png";
 import Image from "next/image";
-import StarBorderRoundedIcon from "@mui/icons-material/StarBorderRounded";
-import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import ShoppingBagOutlinedIcon from "@mui/icons-material/ShoppingBagOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import Link from "next/link";
-import { Button, IconButton, Menu, MenuItem, Badge } from "@mui/material";
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Badge,
+  Tooltip,
+} from "@mui/material";
 import React, { useEffect } from "react";
 import Loading from "../shared/Loading";
 import useStore from "@/store";
@@ -54,26 +60,54 @@ export default function Header() {
           </Link>
         </div>
 
+        <div>
+          <ul className="flex">
+            <Link href="/userStudent">
+              <li className="ml-10 text-lg text-white">Home</li>
+            </Link>
+
+            <Link href="/userStudent/cafe">
+              <li className="ml-10 text-lg text-white">Find a Cafe</li>
+            </Link>
+
+            <Link href="/userStudent/faq">
+              <li className="ml-10 text-lg text-white">FAQs</li>
+            </Link>
+          </ul>
+        </div>
+
         <div className="flex">
           <Link href={`/userStudent/orders`}>
-            <IconButton color="secondary">
-              <GradingIcon className=" text-white" />
-            </IconButton>
+            <Tooltip title="Orders">
+              <IconButton color="secondary">
+                <GradingIcon className=" text-white" />
+              </IconButton>
+            </Tooltip>
           </Link>
 
           <Link href={`/userStudent/cart`}>
-            <IconButton color="secondary" aria-label="add to shopping cart">
-              <Badge
-                badgeContent={totalItems}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                color="error"
-              >
-                <ShoppingBagOutlinedIcon className=" text-white" />
-              </Badge>
-            </IconButton>
+            <Tooltip title="Cart">
+              <IconButton color="secondary" aria-label="add to shopping cart">
+                <Badge
+                  badgeContent={totalItems}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  color="error"
+                >
+                  <ShoppingBagOutlinedIcon className=" text-white" />
+                </Badge>
+              </IconButton>
+            </Tooltip>
+          </Link>
+
+          <Link href={`/userStudent/profile/foodiepassport`}>
+            <Tooltip title="Foodie Passport">
+              <IconButton color="secondary">
+                <StarBorderIcon className=" text-white" />
+              </IconButton>
+            </Tooltip>
           </Link>
 
           <IconButton onClick={handleClick}>
@@ -93,9 +127,6 @@ export default function Header() {
       >
         <Link href={`/userStudent/profile`}>
           <MenuItem onClick={handleClose}>Profile</MenuItem>
-        </Link>
-        <Link href={`/userStudent/profile/foodiepassport`}>
-          <MenuItem onClick={handleClose}>Foodie Passport</MenuItem>
         </Link>
 
         <MenuItem onClick={handleLogout}>Logout</MenuItem>

@@ -20,10 +20,13 @@ import { Cafe } from "@prisma/client";
 import toast from "react-hot-toast";
 import ActiveOrder from "./ActiveOrder";
 import { FilteredCafe } from "@/types/Cafe.type";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 export default function Dashboard() {
   const [online, setOnline] = React.useState(true);
   const [rating, setRating] = React.useState(0);
+  const store = useStore();
 
   const selectedStyle = {
     backgroundColor: "#778CCC",
@@ -36,7 +39,7 @@ export default function Dashboard() {
   const user = useSession();
   function calculateRating(x: any) {
     let totalRating = 0;
-    if (x.length > 0) {
+    if (x?.length > 0) {
       x.forEach((i: any) => {
         totalRating += Number(i.rating);
       });
@@ -47,6 +50,7 @@ export default function Dashboard() {
   const [orders, setOrders] = React.useState<OrderType[]>([] as OrderType[]);
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?cafe=${user?.cafe?.id}`,
       {
@@ -59,17 +63,16 @@ export default function Dashboard() {
     }
     setOrders(await res.json());
     setRating(calculateRating(user?.cafe?.Rating));
+    store.setRequestLoading(false);
   };
 
   function calculateEarning() {
-    let earningWithDeliveryFee = 0
+    let earningWithDeliveryFee = 0;
     orders.forEach((order) => {
-      earningWithDeliveryFee += Number(order.totalPrice)
-    })
+      earningWithDeliveryFee += Number(order.totalPrice) - order.deliveryFee;
+    });
 
-    const deliveryOrder = orders.filter((order) => order.deliveryOption === "DELIVERY")
-
-    return earningWithDeliveryFee - (deliveryOrder.length * 2)
+    return earningWithDeliveryFee;
   }
 
   React.useEffect(() => {
@@ -79,6 +82,7 @@ export default function Dashboard() {
   const changeAvailability = async () => {
     if (user?.cafe?.status) {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/cafe/changeToOffline/${user?.cafe?.id}`,
           {
@@ -95,9 +99,12 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     } else {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/cafe/changeToOnline/${user?.cafe?.id}`,
           {
@@ -114,6 +121,8 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     }
   };
@@ -195,6 +204,7 @@ export default function Dashboard() {
 
         <ActiveOrder />
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { apiGetAllCafe } from "@/lib/api-requests";
 import { FilteredCafe } from "@/types/Cafe.type";
 import Link from "next/link";
 import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const SearchResult = () => {
   const store = useStore();
@@ -16,6 +17,7 @@ const SearchResult = () => {
   );
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/cafe/search?search=${search}}`,
       {
@@ -27,6 +29,7 @@ const SearchResult = () => {
       throw new Error("Screwed up");
     }
     setCafes(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -49,6 +52,7 @@ const SearchResult = () => {
           </Link>
         ))}
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 };

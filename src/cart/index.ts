@@ -21,7 +21,7 @@ export const useCartStore = create(
         set((state) => ({
           products: [...state.products, item],
           totalItems: state.totalItems + item.quantity,
-          totalPrice: state.totalPrice + item.amount,
+          totalPrice: state.totalPrice + Number(item.amount),
         }));
       },
       removeFromCart(item) {

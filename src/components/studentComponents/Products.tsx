@@ -4,14 +4,19 @@ import ProductCard from "./ProductCard";
 import { apiGetAllProduct } from "@/lib/api-requests";
 import React from "react";
 import { Product } from "@/types/Product.type";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 const Products = () => {
   const [products, setProducts] = React.useState<Product[]>([] as Product[]);
+  const store = useStore();
 
   const getProduct = async () => {
+    store.setRequestLoading(true);
     const res = await apiGetAllProduct();
 
     setProducts(res);
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -38,6 +43,7 @@ const Products = () => {
           </Link>
         ))}
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 };

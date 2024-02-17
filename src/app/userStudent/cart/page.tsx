@@ -38,7 +38,6 @@ import {
   Tooltip,
 } from "@mui/material";
 import Link from "next/link";
-import { Payment } from "@mui/icons-material";
 import { useCartStore } from "@/cart";
 import { useEffect } from "react";
 import useSession from "@/lib/useSession";
@@ -51,6 +50,8 @@ import DELIVERY_OPTION from "@/constants/DELIVERY_OPTION";
 import { io } from "socket.io-client";
 import { FilteredRider } from "@/types/Rider.type";
 import toast from "react-hot-toast";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const style = {
   position: "absolute" as "absolute",
@@ -59,7 +60,6 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 800,
   bgcolor: "background.paper",
-  // border: '2px solid #000',
   boxShadow: 24,
   p: 4,
 };
@@ -69,6 +69,7 @@ const selectedStyle = {
 };
 
 export default function Cart() {
+  const store = useStore();
   const [selectedButton, setSelectedButton] = React.useState<DELIVERY_OPTION>(
     "DELIVERY" as DELIVERY_OPTION
   ); // State to manage the selected button
@@ -102,7 +103,7 @@ export default function Cart() {
 
   const [order, setOrder] = React.useState<Order>({} as Order);
   const [note, setNote] = React.useState<string>("-");
-  const [address, setAddress] = React.useState<string>("");
+  const [address, setAddress] = React.useState<string>("ANJUNG SISWA");
   const [promos, setPromos] = React.useState<Promo[]>([] as Promo[]);
   const [riders, setRiders] = React.useState<FilteredRider[]>(
     [] as FilteredRider[]
@@ -143,6 +144,7 @@ export default function Cart() {
   ];
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res1 = await fetch(
       `http://localhost:3000/api/promo?cafe=${products[0]?.cafeId}&status=true`,
       {
@@ -166,6 +168,7 @@ export default function Cart() {
     setPromos(await res1.json());
     setFoodiePassport(await res2.json());
     setRiders(await res3.json());
+    store.setRequestLoading(false);
   };
   useEffect(() => {
     getData();
@@ -189,8 +192,6 @@ export default function Cart() {
     setActiveStep: (i: number) => void,
     paymentValue: number,
     setPaymentValue: (i: number) => void
-    // handleNext:()=> void,
-    // handleBack:()=> void,
   ) => {
     switch (step) {
       case 0:
@@ -240,8 +241,6 @@ export default function Cart() {
     setActiveStep: (i: number) => void,
     paymentValue: number,
     setPaymentValue: (i: number) => void
-    // handleNext:()=> void,
-    // handleBack:()=> void,
   ) => {
     switch (step) {
       case 0:
@@ -285,49 +284,30 @@ export default function Cart() {
     router.push(`/userStudent/orders/${order?.id}`);
   };
   const [activeStep, setActiveStep] = React.useState(0);
-  // const [skipped, setSkipped] = React.useState(new Set<number>());
 
   const [paymentValue, setPaymentValue] = React.useState(1);
   const isStepOptional = (step: number) => {
     return step === 1;
   };
 
-  // const isStepSkipped = (step: number) => {
-  //   return skipped.has(step);
-  // };
-
   const handleTest = () => {
     console.log("halo");
     handleNextPickUp();
   };
   const handleNextDelivery = () => {
-    // let newSkipped = skipped;
-    // if (isStepSkipped(activeStep)) {
-    //   newSkipped = new Set(newSkipped.values());
-    //   newSkipped.delete(activeStep);
-    // }
     if (activeStep === 1 && paymentValue === 0) {
       setActiveStep(3);
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-
-    // setSkipped(newSkipped);
   };
 
   const handleNextPickUp = () => {
-    // let newSkipped = skipped;
-    // if (isStepSkipped(activeStep)) {
-    //   newSkipped = new Set(newSkipped.values());
-    //   newSkipped.delete(activeStep);
-    // }
     if (activeStep === 0 && paymentValue === 0) {
       setActiveStep(2);
     } else {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
-
-    // setSkipped(newSkipped);
   };
 
   const handleCancel = () => {
@@ -344,23 +324,27 @@ export default function Cart() {
     if (promo.type === ("DISCOUNT_VOUCHER" as PROMO_TYPE) && applied) {
       if (totalPrice >= promo.min_spend_amount) {
         if ((totalPrice * promo.discount) / 100 < promo.capped_amount) {
-          return totalPrice - (totalPrice * promo.discount) / 100 + shippingFee;
+          return (
+            totalPrice -
+            (totalPrice * promo.discount) / 100 +
+            Number(shippingFee)
+          );
         } else {
-          return totalPrice - promo.capped_amount + shippingFee;
+          return totalPrice - promo.capped_amount + Number(shippingFee);
         }
       } else {
-        return totalPrice + shippingFee;
+        return totalPrice + Number(shippingFee);
       }
     } else if (promo.type === ("DELIVERY_VOUCHER" as PROMO_TYPE) && applied) {
       return totalPrice;
     } else if (promo.type === ("FOODIE_PASSPORT" as PROMO_TYPE) && applied) {
-      if (totalPrice + shippingFee < promo.capped_amount) {
+      if (totalPrice + Number(shippingFee) < promo.capped_amount) {
         return 0;
       } else {
-        return totalPrice - (promo.amount as number) + shippingFee;
+        return totalPrice - (promo.amount as number) + Number(shippingFee);
       }
     } else {
-      return totalPrice + shippingFee;
+      return totalPrice + Number(shippingFee);
     }
   };
 
@@ -480,7 +464,6 @@ export default function Cart() {
           </Link>
 
           <h1>Checkout</h1>
-          {/* <Typography color="text.primary">KKTM</Typography> */}
         </Breadcrumbs>
       </div>
 
@@ -533,7 +516,15 @@ export default function Cart() {
           </TableBody>
         </Table>
       </TableContainer>
-
+      {products.length > 0 ? (
+        <div className="flex w-full justify-end py-5">
+          <Link href={`/userStudent/cafe/${products[0]?.cafeId}`}>
+            <h1 className="text-[#778CCC] pl-2 font-semibold">
+              Click to add more item
+            </h1>
+          </Link>
+        </div>
+      ) : null}
       <Grid container spacing={4}>
         <Grid item xs={6} sx={{ alignItems: "center" }}>
           <div className="flex flex-col pt-5 gap-5 w-1/2">
@@ -579,6 +570,7 @@ export default function Cart() {
             </div>
           </div>
         </Grid>
+
         <Grid item xs={6} sx={{ justifyContent: "center", display: "flex" }}>
           <div className="flex flex-col pt-5 gap-5">
             <h1>
@@ -593,7 +585,7 @@ export default function Cart() {
                     ? shippingFee
                     : promo.type === ("DELIVERY_VOUCHER" as PROMO_TYPE)
                     ? "0"
-                    : "2"}
+                    : shippingFee}
                 </h1>
                 <h1>
                   Voucher Applied:{" "}
@@ -607,33 +599,23 @@ export default function Cart() {
                 <Divider />
                 <h1>
                   TOTAL : RM
-                  {/* {promo.min_spend_amount >= totalPrice
-                    ? (totalPrice * promo.discount) / 100 < promo.capped_amount
-                      ? totalPrice -
-                        (totalPrice * promo.discount) / 100 +
-                        shippingFee
-                      : totalPrice - promo.capped_amount + shippingFee
-                    : totalPrice +
-                      (promo.type === ("DELIVERY_VOUCHER" as PROMO_TYPE)
-                        ? 0
-                        : 2)} */}
                   {calculateTotal()}
                 </h1>
               </>
             ) : (
               <>
                 <h1>Shipping Fee: RM{shippingFee}</h1>
-                <h1>Voucher Applied: -</h1>
+                <h1>Voucher Applied: - </h1>
 
                 <Divider />
                 <h1>TOTAL : RM{calculateTotal()}</h1>
               </>
             )}
-
             <Button
               variant="contained"
               style={selectedStyle}
               onClick={handleOpen}
+              disabled={products.length < 1}
             >
               Make Payment
             </Button>
@@ -658,14 +640,7 @@ export default function Cart() {
                       const labelProps: {
                         optional?: React.ReactNode;
                       } = {};
-                      // if (isStepOptional(index)) {
-                      //   labelProps.optional = (
-                      //     <Typography variant="caption">Optional</Typography>
-                      //   );
-                      // }
-                      // if (isStepSkipped(index)) {
-                      //   stepProps.completed = false;
-                      // }
+
                       return (
                         <Step key={label} {...stepProps}>
                           <StepLabel {...labelProps}>{label}</StepLabel>
@@ -677,14 +652,6 @@ export default function Cart() {
                       const labelProps: {
                         optional?: React.ReactNode;
                       } = {};
-                      // if (isStepOptional(index)) {
-                      //   labelProps.optional = (
-                      //     <Typography variant="caption">Optional</Typography>
-                      //   );
-                      // }
-                      // if (isStepSkipped(index)) {
-                      //   stepProps.completed = false;
-                      // }
                       return (
                         <Step key={label} {...stepProps}>
                           <StepLabel {...labelProps}>{label}</StepLabel>
@@ -719,13 +686,6 @@ export default function Cart() {
                         Cancel
                       </Button>
                       <Box sx={{ flex: "1 1 auto" }} />
-                      {/* {isStepOptional(activeStep) && (
-              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                Skip
-              </Button>
-            )} */}
-
-                      {/* <Link href={`/orders/${Order.id}`}> */}
 
                       <Button
                         disabled={activeStep === 2}
@@ -741,7 +701,6 @@ export default function Cart() {
                           ? "Finish"
                           : "Next"}
                       </Button>
-                      {/* </Link> */}
                     </Box>
                   </React.Fragment>
                 )
@@ -771,13 +730,6 @@ export default function Cart() {
                       Cancel
                     </Button>
                     <Box sx={{ flex: "1 1 auto" }} />
-                    {/* {isStepOptional(activeStep) && (
-              <Button color="inherit" onClick={handleSkip} sx={{ mr: 1 }}>
-                Skip
-              </Button>
-            )} */}
-
-                    {/* <Link href={`/orders/${Order.id}`}> */}
 
                     <Button
                       disabled={activeStep === 1}
@@ -793,7 +745,6 @@ export default function Cart() {
                         ? "Finish"
                         : "Next"}
                     </Button>
-                    {/* </Link> */}
                   </Box>
                 </React.Fragment>
               )}
@@ -801,6 +752,7 @@ export default function Cart() {
           </Box>
         </Modal>
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

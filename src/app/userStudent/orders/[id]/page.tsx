@@ -8,7 +8,7 @@ import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
 import WhereToVoteIcon from "@mui/icons-material/WhereToVote";
 import EastIcon from "@mui/icons-material/East";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { Button, Grid, Modal, TextField } from "@mui/material";
+import { Button, Grid, Modal, TextField, Tooltip } from "@mui/material";
 import CustomizedSwitches from "@/components/studentComponents/Switch";
 import { styled } from "@mui/material/styles";
 import Rating, { IconContainerProps } from "@mui/material/Rating";
@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import useStore from "@/store";
 import Loading from "@/components/shared/Loading";
 import { io } from "socket.io-client";
+import moment from "moment";
 
 const style = {
   position: "absolute" as "absolute",
@@ -32,7 +33,6 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 800,
   bgcolor: "background.paper",
-  // border: '2px solid #000',
   boxShadow: 24,
   p: 4,
 };
@@ -93,6 +93,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
   const [review, setReview] = React.useState<string>("");
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
       cache: "no-store",
     });
@@ -101,6 +102,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
       throw new Error("Screwed up");
     }
     setOrder(await res.json());
+    store.setRequestLoading(false);
   };
 
   const updateToComplete = async () => {
@@ -128,7 +130,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
   const calculateSubtotal = () => {
     let x: number = 0;
     order?.products?.forEach((product) => {
-      x += product.amount;
+      x += Number(product.amount);
     });
     // x += order.deliveryFee as number;
     setSubtotal(x);
@@ -199,66 +201,97 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
           <div className="flex flex-col gap-3 justify-center items-center">
             <h1 className="font-bold text-2xl">Your order is confirmed!</h1>
             <h1 className="text-xl font-bold">#{order?.id?.slice(-5)}</h1>
-            <h1>8:30am-8:45am</h1>
+            {order.deliveryOption === "DELIVERY" ? (
+              <h1>
+                Estimated Arrival Time:{" "}
+                {moment(order.createdAt).add(30, "minutes").format("hh:mma")}{" "}
+                {" - "}
+                {moment(order.createdAt).add(45, "minutes").format("hh:mma")}
+              </h1>
+            ) : (
+              <h1>
+                Estimated Pick Up Time:{" "}
+                {moment(order.createdAt).add(15, "minutes").format("hh:mma")}{" "}
+                {" - "}
+                {moment(order.createdAt).add(30, "minutes").format("hh:mma")}
+              </h1>
+            )}
 
             {order.deliveryOption === "DELIVERY" ? (
               <div className="flex flex-row gap-6">
-                <SelfImprovementIcon
-                  className={
-                    order.status === "PREPARING"
-                      ? "text-4xl animate-pulse"
-                      : "text-4xl"
-                  }
-                  color={order.status === "PREPARING" ? "success" : "inherit"}
-                />
+                <Tooltip title="Preparing">
+                  <SelfImprovementIcon
+                    className={
+                      order.status === "PREPARING"
+                        ? "text-4xl animate-pulse"
+                        : "text-4xl"
+                    }
+                    color={order.status === "PREPARING" ? "success" : "inherit"}
+                  />
+                </Tooltip>
                 <EastIcon />
-                <DirectionsRunIcon
-                  className={
-                    order.status === "PICKUP"
-                      ? "text-4xl animate-pulse"
-                      : "text-4xl"
-                  }
-                  color={order.status === "PICKUP" ? "success" : "inherit"}
-                />
+                <Tooltip title="Pick Up">
+                  <DirectionsRunIcon
+                    className={
+                      order.status === "PICKUP"
+                        ? "text-4xl animate-pulse"
+                        : "text-4xl"
+                    }
+                    color={order.status === "PICKUP" ? "success" : "inherit"}
+                  />
+                </Tooltip>
+
                 <EastIcon />
-                <DirectionsBikeIcon
-                  className={
-                    order.status === "DELIVERING"
-                      ? "text-4xl animate-pulse"
-                      : "text-4xl"
-                  }
-                  color={order.status === "DELIVERING" ? "success" : "inherit"}
-                />
+                <Tooltip title="Delivering">
+                  <DirectionsBikeIcon
+                    className={
+                      order.status === "DELIVERING"
+                        ? "text-4xl animate-pulse"
+                        : "text-4xl"
+                    }
+                    color={
+                      order.status === "DELIVERING" ? "success" : "inherit"
+                    }
+                  />
+                </Tooltip>
                 <EastIcon />
-                <WhereToVoteIcon
-                  className="text-4xl"
-                  color={order.status === "COMPLETED" ? "success" : "inherit"}
-                />
+                <Tooltip title="Completed">
+                  <WhereToVoteIcon
+                    className="text-4xl"
+                    color={order.status === "COMPLETED" ? "success" : "inherit"}
+                  />
+                </Tooltip>
               </div>
             ) : (
               <div className="flex flex-row gap-6">
-                <SelfImprovementIcon
-                  className={
-                    order.status === "PREPARING"
-                      ? "text-4xl animate-pulse"
-                      : "text-4xl"
-                  }
-                  color={order.status === "PREPARING" ? "success" : "inherit"}
-                />
+                <Tooltip title="Preparing">
+                  <SelfImprovementIcon
+                    className={
+                      order.status === "PREPARING"
+                        ? "text-4xl animate-pulse"
+                        : "text-4xl"
+                    }
+                    color={order.status === "PREPARING" ? "success" : "inherit"}
+                  />
+                </Tooltip>
                 <EastIcon />
-                <DirectionsRunIcon
-                  className={
-                    order.status === "PICKUP"
-                      ? "text-4xl animate-pulse"
-                      : "text-4xl"
-                  }
-                  color={order.status === "PICKUP" ? "success" : "inherit"}
-                />
+                <Tooltip title="Pick Up">
+                  <DirectionsRunIcon
+                    className={
+                      order.status === "PICKUP"
+                        ? "text-4xl animate-pulse"
+                        : "text-4xl"
+                    }
+                    color={order.status === "PICKUP" ? "success" : "inherit"}
+                  />
+                </Tooltip>
                 <EastIcon />
-                <WhereToVoteIcon
-                  className="text-4xl"
-                  color={order.status === "COMPLETED" ? "success" : "inherit"}
-                />
+                <Tooltip title="Completed">
+                  <WhereToVoteIcon
+                    className="text-4xl"
+                    color={order.status === "COMPLETED" ? "success" : "inherit"}
+                  />
+                </Tooltip>
               </div>
             )}
 
@@ -402,30 +435,34 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
               >
                 <h1 className="text-xl font-bold">RM{order?.totalPrice}</h1>
               </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Pick up at: {order?.cafe?.loc.location}</h1>
-              </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Note to Rider: {order?.noteToRider}</h1>
-              </Grid>
+              {order.deliveryOption === "PICKUP" ? (
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    justifyContent: "start",
+                    alignItems: "center",
+                    pl: 10,
+                  }}
+                  xs={12}
+                >
+                  <h1>Pick up at: {order?.cafe?.loc.location}</h1>
+                </Grid>
+              ) : (
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    justifyContent: "start",
+                    alignItems: "center",
+                    pl: 10,
+                  }}
+                  xs={12}
+                >
+                  <h1>Note to Rider: {order?.noteToRider}</h1>
+                </Grid>
+              )}
+
               {(order.deliveryOption === "DELIVERY" &&
                 order.status === "DELIVERING") ||
               (order.deliveryOption === "PICKUP" &&

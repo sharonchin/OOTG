@@ -61,6 +61,12 @@ const UserSignUp = () => {
             </div>
           </Link>
         </div>
+        <div className="flex justify-center items-center flex-row pt-10">
+          <h1>Already have an account?</h1>
+          <Link href="/login">
+            <h1 className="text-black pl-2">Login</h1>
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -19,6 +19,8 @@ import { Order } from "@/types/Order.type";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const style = {
   position: "absolute" as "absolute",
@@ -44,9 +46,11 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
   };
   const [socket, setSocket] = React.useState<any>(undefined);
   const [order, setOrder] = React.useState<Order>({} as Order);
-  const router = useRouter()
+  const router = useRouter();
+  const store = useStore();
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
       cache: "no-store",
     });
@@ -55,9 +59,11 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
       throw new Error("Screwed up");
     }
     setOrder(await res.json());
+    store.setRequestLoading(false);
   };
 
   const updateToDelivery = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders/updateToDelivery/${params.id}`,
       {
@@ -70,7 +76,8 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
     }
 
     toast.success("Status Updated Successfully");
-    socket.emit("delivery", true)
+    socket.emit("delivery", true);
+    store.setRequestLoading(false);
     return router.push("/userRider/order");
   };
 
@@ -79,11 +86,26 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const [subtotal, setSubtotal] = React.useState<number>(0);
+  const calculateSubtotal = () => {
+    let x: number = 0;
+    order?.products?.forEach((product) => {
+      x += Number(product.amount);
+    });
+    // x += order.deliveryFee as number;
+    setSubtotal(x);
+  };
+
+  React.useEffect(() => {
+    calculateSubtotal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
+
   React.useEffect(() => {
     const socket = io("http://localhost:3001");
 
     socket.on("update_user", (update) => {
-      if(update){
+      if (update) {
         getData();
       }
     });
@@ -103,7 +125,8 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
           m: 1,
           pt: 10,
           width: 600,
-          height: 600,
+          height: "auto",
+          pb: 10,
         },
       }}
     >
@@ -131,6 +154,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                       {row.quantity} x {row.name}
                     </h1>
                   </Grid>
+
                   <Grid
                     item
                     sx={{
@@ -142,6 +166,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   >
                     <h1>{row.amount}</h1>
                   </Grid>
+
                   <Grid
                     item
                     sx={{
@@ -156,14 +181,12 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   </Grid>
                 </>
               ))}
-
               <Grid
                 item
                 sx={{
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  pt: 6,
                 }}
                 xs={6}
               >
@@ -175,12 +198,12 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  pt: 6,
                 }}
                 xs={6}
               >
-                <h1>{order?.totalPrice}</h1>
+                <h1>{subtotal}</h1>
               </Grid>
+
               <Grid
                 item
                 sx={{
@@ -201,7 +224,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>{order?.deliveryFee}</h1>
               </Grid>
               <Grid
                 item
@@ -223,7 +246,11 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>
+                  {Number(subtotal) +
+                    Number(order?.deliveryFee) -
+                    order?.totalPrice}
+                </h1>
               </Grid>
               <Grid
                 item
@@ -254,10 +281,41 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   justifyContent: "start",
                   alignItems: "center",
                   pl: 10,
+                  pt: 5,
+                  pb: 1,
                 }}
                 xs={12}
               >
-                <h1>Pick Up at: {order?.cafe?.name}</h1>
+                <h1>
+                  Pick Up at:{" "}
+                  {`${order?.cafe?.name} (${order?.cafe?.loc.location})`}
+                </h1>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  pl: 10,
+
+                  pb: 1,
+                }}
+                xs={12}
+              >
+                <h1>Deliver to: {order?.deliveryAddress}</h1>
+              </Grid>
+              <Grid
+                item
+                sx={{
+                  display: "flex",
+                  justifyContent: "start",
+                  alignItems: "center",
+                  pl: 10,
+                }}
+                xs={12}
+              >
+                <h1>Note from Student: {order?.noteToRider}</h1>
               </Grid>
 
               <div></div>
@@ -274,7 +332,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   xs={12}
                 >
                   <CustomizedSwitches
-                    label="Update to Delivery"
+                    label="Update to Delivering"
                     handleOpen={updateToDelivery}
                   />
                 </Grid>
@@ -301,6 +359,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
           </Box>
         </div>
       </Paper>
+      {store.requestLoading && <Loading />}
     </Box>
   );
 };

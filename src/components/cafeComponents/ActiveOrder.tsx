@@ -9,20 +9,23 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
-import ModeEditOutlineOutlinedIcon from "@mui/icons-material/ModeEditOutlineOutlined";
 import { Order } from "@/types/Order.type";
 import useSession from "@/lib/useSession";
 import { IconButton, TablePagination } from "@mui/material";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 export default function ActiveOrderPage() {
   const user = useSession();
   const [orders, setOrders] = React.useState<Order[]>([] as Order[]);
   const router = useRouter();
   const [page, setPage] = React.useState(0);
+  const store = useStore();
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?cafe=${user?.cafe?.id}&active=true`,
       {
@@ -34,6 +37,7 @@ export default function ActiveOrderPage() {
       throw new Error("Screwed up");
     }
     setOrders(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -61,13 +65,15 @@ export default function ActiveOrderPage() {
 
   return (
     <div className="px-5 w-full h-20 justify-center items-center ">
-      <TableContainer component={Paper}>
+      <span className="text-xl font-bold">Active Order</span>
+      <TableContainer component={Paper} sx={{ mt: 1 }}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell align="center">Order ID</TableCell>
               <TableCell align="center">Order Created</TableCell>
               <TableCell align="center">Order Type</TableCell>
-              <TableCell align="center">Location</TableCell>
+
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">Action</TableCell>
             </TableRow>
@@ -78,11 +84,12 @@ export default function ActiveOrderPage() {
                 key={row.id}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
+                <TableCell align="center">#{row.id.slice(-5)}</TableCell>
                 <TableCell align="center">
                   {moment(row.createdAt).format("DD/MM/YYYY hh:mma")}
                 </TableCell>
                 <TableCell align="center">{row.deliveryOption}</TableCell>
-                <TableCell align="center">{row.cafe.loc.location}</TableCell>
+
                 <TableCell align="center">{row.status}</TableCell>
                 <TableCell align="center">
                   <IconButton
@@ -92,9 +99,7 @@ export default function ActiveOrderPage() {
                   >
                     <VisibilityOutlinedIcon />
                   </IconButton>
-                  {/* <IconButton>
-                    <ModeEditOutlineOutlinedIcon />
-                  </IconButton> */}
+           
                 </TableCell>
               </TableRow>
             ))}
@@ -107,6 +112,7 @@ export default function ActiveOrderPage() {
           onPageChange={handleChangePage}
         />
       </TableContainer>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

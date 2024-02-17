@@ -16,14 +16,18 @@ import { useRouter } from "next/navigation";
 import { Order } from "@/types/Order.type";
 import useSession from "@/lib/useSession";
 import moment from "moment";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 export default function Order() {
   const user = useSession();
   const router = useRouter();
   const [orders, setOrders] = React.useState<Order[]>([] as Order[]);
   const [page, setPage] = React.useState(0);
+  const store = useStore();
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?rider=${user?.rider?.id}`,
       {
@@ -35,6 +39,7 @@ export default function Order() {
       throw new Error("Screwed up");
     }
     setOrders(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -123,6 +128,7 @@ export default function Order() {
           onPageChange={handleChangePage}
         />
       </TableContainer>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

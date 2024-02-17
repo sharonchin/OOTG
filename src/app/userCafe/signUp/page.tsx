@@ -41,6 +41,7 @@ export default function SignUp() {
   } = methods;
   //get data from localhost 3000
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch("http://localhost:3000/api/location", {
       cache: "no-store",
     });
@@ -50,6 +51,7 @@ export default function SignUp() {
     }
 
     setLocations(await res.json());
+    store.setRequestLoading(false);
   };
   useEffect(() => {
     getData();
@@ -147,7 +149,7 @@ export default function SignUp() {
         }
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       store.setRequestLoading(false);
     }

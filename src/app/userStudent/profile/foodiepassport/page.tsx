@@ -5,6 +5,8 @@ import AcUnitOutlinedIcon from "@mui/icons-material/AcUnitOutlined";
 import { Order } from "@/types/Order.type";
 import useSession from "@/lib/useSession";
 import { Promo } from "@/types/Promo.type";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const FoodiePassport = () => {
   const totalBoxes = 10;
@@ -17,6 +19,7 @@ const FoodiePassport = () => {
   );
   const orders = completedOrders.length % 10;
   const user = useSession();
+  const store = useStore();
 
   const boxes = Array.from({ length: totalBoxes }, (_, i) => (
     <Box
@@ -63,6 +66,7 @@ const FoodiePassport = () => {
   const row2 = boxes.slice(5);
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const completeOrders = await fetch(
       `http://localhost:3000/api/orders?student=${user?.student?.id}&completed=true`,
       {
@@ -81,6 +85,7 @@ const FoodiePassport = () => {
     }
     setCompletedOrders(await completeOrders.json());
     setActiveFoodieVoucher(await foodiePassport.json());
+    store.setRequestLoading(false);
   };
 
   useEffect(() => {
@@ -95,7 +100,6 @@ const FoodiePassport = () => {
           palette: {
             primary: {
               main: "#C2D7F3",
-              //   dark: '#0066CC',
             },
           },
         }}
@@ -111,10 +115,6 @@ const FoodiePassport = () => {
             display: "flex",
             flexDirection: "column",
             p: 5,
-
-            //   '&:hover': {
-            //     bgcolor: 'primary.dark',
-            //   },
           }}
         >
           {/* {boxes} */}
@@ -129,6 +129,7 @@ const FoodiePassport = () => {
           </h1>
         </div>
       </ThemeProvider>
+      {store.requestLoading && <Loading />}
     </div>
   );
 };

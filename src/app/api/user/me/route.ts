@@ -18,13 +18,12 @@ export async function GET(req: NextRequest) {
       student: true,
       cafe: {
         include: {
-          Rating: true
-        }
+          Rating: true,
+        },
       },
       rider: true,
     },
   });
-  console.log(userId);
   return NextResponse.json({
     status: "success",
     data: { user: user },

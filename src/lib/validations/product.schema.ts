@@ -27,6 +27,16 @@ export const ProductCreationSchema = z.object({
       required_error: "Cafe is required",
     })
     .min(1, "Cafe is required"),
+
+  keywords: z
+    .array(
+      z
+        .string({
+          required_error: "Keywords are required",
+        })
+        .min(1, "Keywords are required")
+    )
+    .min(1, "Keywords are required"),
 });
 
 export const ProductUpdateSchema = z.object({

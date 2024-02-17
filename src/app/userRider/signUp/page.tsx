@@ -70,7 +70,6 @@ export default function SignUp() {
   }
 
   const onSubmitHandler: SubmitHandler<RegisterRiderInput> = (values) => {
-    console.log(values);
     RegisterRiderFunction(values);
   };
 
@@ -95,37 +94,45 @@ export default function SignUp() {
                 type="password"
               />
               <FormInput label="Phone Number" name="phoneNo" />
-              <div className="flex flex-row justify-around">
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"CAR" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">Car</h1>
-                  </div>
+              <div className="flex flex-col justify-around">
+                <label
+                  htmlFor={"deliveryMode"}
+                  className="block text-ct-blue-600 mb-3"
+                >
+                  Mode of Delivery
                 </label>
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"MOTORCYCLE" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">Motorcycle</h1>
-                  </div>
-                </label>
-                <label>
-                  <div className="flex">
-                    <input
-                      type="radio"
-                      value={"BYFOOT" as DELIVERY_MODE}
-                      {...register("deliveryMode")}
-                    />
-                    <h1 className="pl-2">By Foot</h1>
-                  </div>
-                </label>
+                <div className="flex flex-row justify-around">
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"CAR" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">Car</h1>
+                    </div>
+                  </label>
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"MOTORCYCLE" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">Motorcycle</h1>
+                    </div>
+                  </label>
+                  <label>
+                    <div className="flex">
+                      <input
+                        type="radio"
+                        value={"BYFOOT" as DELIVERY_MODE}
+                        {...register("deliveryMode")}
+                      />
+                      <h1 className="pl-2">By Foot</h1>
+                    </div>
+                  </label>
+                </div>
                 {errors["deliveryMode"] && (
                   <span className="text-red-500 text-xs pt-1 block">
                     {errors["deliveryMode"]?.message as string}

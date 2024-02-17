@@ -19,7 +19,7 @@ export default function MainMenu() {
   };
 
   return (
-    <div className="flex flex-col pt-6">
+    <div className="flex flex-col pt-10">
       <div className="h-3/4 w-full flex justify-center flex-col pt-20 col-md-4 space-y-4">
         {/*Top*/}
         <ButtonGroup variant="outlined" aria-label="outlined button group">

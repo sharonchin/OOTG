@@ -1,6 +1,5 @@
 "use client";
 
-import { Order } from "@/types/Order.type";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 import { io } from "socket.io-client";

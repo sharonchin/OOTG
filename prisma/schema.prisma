@@ -83,7 +83,7 @@ model Product {
   availability    Boolean         @default(true)
   cafe            Cafe            @relation(fields: [cafeId], references: [id])
   cafeId          String
-  // OrderLine       OrderLine[]
+  keywords        String[]
 }
 
 model Order {
@@ -106,18 +106,7 @@ model Order {
   rider           Rider?         @relation(fields: [riderId], references: [id])
   riderId         String?
   rating          Rating[]
-  // OrderLine  OrderLine[]
 }
-
-// model OrderLine {
-//   id          String  @id @default(cuid())
-//   product     Product @relation(fields: [productId], references: [id])
-//   productId   String
-//   order       Order   @relation(fields: [orderId], references: [id])
-//   orderId     String
-//   quantity    Int
-//   studentNote String?
-// }
 
 model FoodiePassport {
   id               String    @id @default(cuid())

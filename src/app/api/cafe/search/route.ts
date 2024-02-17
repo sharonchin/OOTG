@@ -18,6 +18,15 @@ export const GET = async (req: NextRequest) => {
             },
           },
           {
+            products: {
+              some: {
+                keywords: {
+                  has: search as string,
+                },
+              },
+            },
+          },
+          {
             name: {
               search: search as string,
             },

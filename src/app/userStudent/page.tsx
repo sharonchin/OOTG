@@ -7,8 +7,6 @@ import Products from "@/components/studentComponents/Products";
 export default function Home() {
   return (
     <div className="flex flex-col">
-    
-      {/* <Recommended/> */}
       <Cafes />
       <Products />
     </div>

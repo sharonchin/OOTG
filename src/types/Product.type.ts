@@ -12,6 +12,7 @@ export type Product = {
   availability: boolean;
   cafeId: string;
   cafe: FilteredCafe;
+  keywords: string[];
 };
 
 export interface ProductResponse {

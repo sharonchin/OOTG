@@ -15,14 +15,18 @@ import useSession from "@/lib/useSession";
 import { IconButton, TablePagination } from "@mui/material";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 export default function OrderPage() {
   const user = useSession();
   const [orders, setOrders] = React.useState<Order[]>([] as Order[]);
   const router = useRouter();
   const [page, setPage] = React.useState(0);
+  const store = useStore();
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?cafe=${user?.cafe?.id}`,
       {
@@ -34,6 +38,7 @@ export default function OrderPage() {
       throw new Error("Screwed up");
     }
     setOrders(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -59,6 +64,15 @@ export default function OrderPage() {
     setPage(newPage);
   };
 
+  const [subtotal, setSubtotal] = React.useState<number>(0);
+  const calculateSubtotal = (order: any) => {
+    let x: number = 0;
+    order?.products?.forEach((product: any) => {
+      x += Number(product.amount);
+    });
+    return x;
+  };
+
   return (
     <div className="px-5 w-full h-20 justify-center items-center ">
       <TableContainer component={Paper}>
@@ -68,7 +82,7 @@ export default function OrderPage() {
               <TableCell align="center">Order ID</TableCell>
               <TableCell align="center">Order Created</TableCell>
               <TableCell align="center">Order Type</TableCell>
-
+              <TableCell align="center">Amount</TableCell>
               <TableCell align="center">Status</TableCell>
               <TableCell align="center">Action</TableCell>
             </TableRow>
@@ -84,6 +98,7 @@ export default function OrderPage() {
                   {moment(row.createdAt).format("DD/MM/YYYY hh:mma")}
                 </TableCell>
                 <TableCell align="center">{row.deliveryOption}</TableCell>
+                <TableCell align="center">{calculateSubtotal(row)}</TableCell>
 
                 <TableCell align="center">{row.status}</TableCell>
                 <TableCell align="center">
@@ -94,9 +109,6 @@ export default function OrderPage() {
                   >
                     <VisibilityOutlinedIcon />
                   </IconButton>
-                  {/* <IconButton>
-                    <ModeEditOutlineOutlinedIcon />
-                  </IconButton> */}
                 </TableCell>
               </TableRow>
             ))}
@@ -109,6 +121,7 @@ export default function OrderPage() {
           onPageChange={handleChangePage}
         />
       </TableContainer>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

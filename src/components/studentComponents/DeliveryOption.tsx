@@ -69,9 +69,6 @@ export default function DeliveryOption({
           onChange={handleChange}
           label="Address"
         >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
           {locations.sort(compare).map((loc) => (
             <MenuItem id={loc.id} value={loc.location}>
               <em>{loc.location}</em>

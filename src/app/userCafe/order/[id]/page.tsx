@@ -19,6 +19,8 @@ import { Order } from "@/types/Order.type";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useRouter } from "next/navigation";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 const style = {
   position: "absolute" as "absolute",
@@ -46,6 +48,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
 
   const [socket, setSocket] = React.useState<any>(undefined);
   const router = useRouter();
+  const store = useStore();
 
   React.useEffect(() => {
     const socket = io("http://localhost:3001");
@@ -54,6 +57,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
   }, []);
 
   const getData = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(`http://localhost:3000/api/orders/${params.id}`, {
       cache: "no-store",
     });
@@ -62,9 +66,11 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
       throw new Error("Screwed up");
     }
     setOrder(await res.json());
+    store.setRequestLoading(false);
   };
 
   const updateToPickUp = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders/updateToPickUp/${params.id}`,
       {
@@ -78,6 +84,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
 
     toast.success("Status Updated Successfully");
     socket.emit("pickup", true);
+    store.setRequestLoading(false);
     return router.push("/userCafe/order");
   };
 
@@ -85,6 +92,21 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
     getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [subtotal, setSubtotal] = React.useState<number>(0);
+  const calculateSubtotal = () => {
+    let x: number = 0;
+    order?.products?.forEach((product) => {
+      x += Number(product.amount);
+    });
+    // x += order.deliveryFee as number;
+    setSubtotal(x);
+  };
+
+  React.useEffect(() => {
+    calculateSubtotal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [order]);
 
   return (
     <Box
@@ -98,13 +120,17 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
           m: 1,
           pt: 10,
           width: 600,
-          height: 600,
+          height: "auto",
+          pb: 10,
         },
       }}
     >
       <Paper elevation={1}>
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-3">
           <h1 className="text-bold text-2xl">There's an order for you!</h1>
+          <h1 className="text-bold text-xl font-bold">
+            {order?.deliveryOption}
+          </h1>
           <h1 className="text-xl font-bold">#{order?.id?.slice(-5)}</h1>
           <h1 className="underline underline-offset-4">Order Details</h1>
           <Box
@@ -126,6 +152,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                       {row.quantity} x {row.name}
                     </h1>
                   </Grid>
+
                   <Grid
                     item
                     sx={{
@@ -137,6 +164,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   >
                     <h1>{row.amount}</h1>
                   </Grid>
+
                   <Grid
                     item
                     sx={{
@@ -151,14 +179,12 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   </Grid>
                 </>
               ))}
-
               <Grid
                 item
                 sx={{
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  pt: 6,
                 }}
                 xs={6}
               >
@@ -170,12 +196,12 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  pt: 6,
                 }}
                 xs={6}
               >
-                <h1>{order?.totalPrice}</h1>
+                <h1>{subtotal}</h1>
               </Grid>
+
               <Grid
                 item
                 sx={{
@@ -196,7 +222,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>{order?.deliveryFee}</h1>
               </Grid>
               <Grid
                 item
@@ -218,7 +244,11 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 }}
                 xs={6}
               >
-                <h1>0</h1>
+                <h1>
+                  {Number(subtotal) +
+                    Number(order?.deliveryFee) -
+                    order?.totalPrice}
+                </h1>
               </Grid>
               <Grid
                 item
@@ -241,18 +271,6 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
                 xs={6}
               >
                 <h1 className="text-xl font-bold">RM{order?.totalPrice}</h1>
-              </Grid>
-              <Grid
-                item
-                sx={{
-                  display: "flex",
-                  justifyContent: "start",
-                  alignItems: "center",
-                  pl: 10,
-                }}
-                xs={12}
-              >
-                <h1>Pick Up at: {order?.cafe?.name}</h1>
               </Grid>
 
               <div></div>
@@ -295,6 +313,7 @@ const OrderDetails = ({ params }: { params: { id: string } }) => {
           </Box>
         </div>
       </Paper>
+      {store.requestLoading && <Loading />}
     </Box>
   );
 };

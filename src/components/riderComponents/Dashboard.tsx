@@ -18,6 +18,8 @@ import STATUS from "@/constants/STATUS";
 import useSession from "@/lib/useSession";
 import toast from "react-hot-toast";
 import { Order as OrderType } from "@/types/Order.type";
+import useStore from "@/store";
+import Loading from "../shared/Loading";
 
 export default function Dashboard() {
   const [online, setOnline] = React.useState(true);
@@ -32,8 +34,10 @@ export default function Dashboard() {
 
   const user = useSession();
   const [orders, setOrders] = React.useState<OrderType[]>([] as OrderType[]);
+  const store = useStore();
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?rider=${user?.rider?.id}`,
       {
@@ -45,6 +49,7 @@ export default function Dashboard() {
       throw new Error("Screwed up");
     }
     setOrders(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -54,6 +59,7 @@ export default function Dashboard() {
   const changeAvailability = async () => {
     if (user?.rider?.status) {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/rider/changeToOffline/${user?.rider?.id}`,
           {
@@ -70,9 +76,12 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     } else {
       try {
+        store.setRequestLoading(true);
         const res = await fetch(
           `http://localhost:3000/api/rider/changeToOnline/${user?.rider?.id}`,
           {
@@ -89,6 +98,8 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        store.setRequestLoading(false);
       }
     }
   };
@@ -102,7 +113,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div>
+    <div className="pt-6">
       <span className="flex justify-center font-bold text-2xl ">
         Welcome Back {user?.rider?.firstName}!
       </span>
@@ -142,7 +153,7 @@ export default function Dashboard() {
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <div className="flex flex-col justify-center gap-2 items-center">
-            <span>{`You're ${
+              <span>{`You're ${
                 user?.rider?.status ? "online" : "offline"
               }`}</span>
               <Button
@@ -171,28 +182,28 @@ export default function Dashboard() {
             elevation={2}
             sx={{ display: "flex", justifyContent: "center" }}
           >
-              {activeOrder.length > 0 ? (
-            <div className="flex flex-col justify-center gap-2 items-center">
+            {activeOrder.length > 0 ? (
+              <div className="flex flex-col justify-center gap-2 items-center">
+                <h1 className="font-bold text-2xl">Active Order</h1>
+                <span>{`Pick Up : ${activeOrder[0]?.cafe.loc.location} - ${activeOrder[0]?.cafe.name}`}</span>
+                <span>{`Drop off: ${activeOrder[0]?.deliveryAddress}`}</span>
+                <span>{`Note from Student: ${activeOrder[0]?.noteToRider}`}</span>
 
-              <h1 className="font-bold text-2xl">Active Order</h1>
-              <span>{`Pick Up : ${activeOrder[0]?.cafe.loc.location} - ${activeOrder[0]?.cafe.name}`}</span>
-              <span>{`Drop off: ${activeOrder[0]?.deliveryAddress}`}</span>
-              <span>{`Note from Student: ${activeOrder[0]?.noteToRider}`}</span>
-
-              <Link href={`/userRider/order/${activeOrder[0].id}`}>
-                <Button variant="contained" style={selectedStyle}>
-                  View Your Order
-                </Button>
-              </Link>
-            </div>
-              ) : (
-                <div className="flex flex-col justify-center gap-2 items-center">
-                  <h1 className="font-bold text-2xl">No Active Orders</h1>
-                </div>
-              )}
+                <Link href={`/userRider/order/${activeOrder[0].id}`}>
+                  <Button variant="contained" style={selectedStyle}>
+                    View Your Order
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col justify-center gap-2 items-center">
+                <h1 className="font-bold text-2xl">No Active Orders</h1>
+              </div>
+            )}
           </Paper>
         </Box>
       </div>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }

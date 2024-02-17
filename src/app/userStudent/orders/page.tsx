@@ -16,14 +16,18 @@ import useSession from "@/lib/useSession";
 import { IconButton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import useStore from "@/store";
+import Loading from "@/components/shared/Loading";
 
 export default function OrderPage() {
   const user = useSession();
   const [orders, setOrders] = React.useState<Order[]>([] as Order[]);
   const router = useRouter();
   const [page, setPage] = React.useState(0);
+  const store = useStore();
 
   const getOrder = async () => {
+    store.setRequestLoading(true);
     const res = await fetch(
       `http://localhost:3000/api/orders?student=${user?.student?.id}`,
       {
@@ -35,6 +39,7 @@ export default function OrderPage() {
       throw new Error("Screwed up");
     }
     setOrders(await res.json());
+    store.setRequestLoading(false);
   };
 
   React.useEffect(() => {
@@ -95,9 +100,6 @@ export default function OrderPage() {
                   >
                     <VisibilityOutlinedIcon />
                   </IconButton>
-                  {/* <IconButton>
-                    <ModeEditOutlineOutlinedIcon />
-                  </IconButton> */}
                 </TableCell>
               </TableRow>
             ))}
@@ -110,6 +112,7 @@ export default function OrderPage() {
           onPageChange={handleChangePage}
         />
       </TableContainer>
+      {store.requestLoading && <Loading />}
     </div>
   );
 }
